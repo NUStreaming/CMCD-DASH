@@ -1,6 +1,6 @@
 # CMCD-DASH
 
-# Quick Start
+## Quick Start
 
 Run dash.js:
 - Path: `CMCD-DASH/`
@@ -16,8 +16,8 @@ Run single test with network profile:
 - `npm run test`
 
 
-# TODO
+## TODO
 
-- Set up `cmcd-server`, and update `run.js` with server command (if any)
+- Set up `cmcd-server/`, and update `run.js` with server command (if any)
 - Add to `dash-test-batch` multi-client headless mode
 - Determine vod/live streaming and metrics, and update `index.html`, `run.js`, `dash-test-batch/` accordingly
