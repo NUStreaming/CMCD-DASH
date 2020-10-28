@@ -1,0 +1,4 @@
+node_modules
+.DS_Store
+results*
+dash-test-batch/results_processing
