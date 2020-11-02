@@ -49,4 +49,4 @@ function testRateControl(r) {
     r.finish();
 }
 
-export default { hello, testProcessQuery, testRateControl };
+export default { testProcessQuery, testRateControl };
