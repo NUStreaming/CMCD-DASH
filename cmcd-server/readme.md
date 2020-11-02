@@ -4,13 +4,13 @@ Nginx JS (njs) webserver and middleware.
 
 # Installation
 
-1. Install Nginx Open Source
-1. Install njs module in nginx
+- Install Nginx Open Source
+- Install njs module in nginx
   - Mac OSX guide: https://github.com/Jiri-Mihal/install-nginx-module-mac-osx (Note change in `--add-dynamic-module=../njs-XXXXXXXXX` to `--add-dynamic-module=../njs-XXXXXXXX/nginx`)
-1. Setup njs in nginx config
+- Setup njs in nginx config
   - Update `nginx.conf` with the below. Remember to update `<PATH_TO_CMCD-DASH>`
 
-```
+```apacheconf
 # nginx.conf
 
 ...
@@ -32,9 +32,6 @@ http {
         ...
 
         # njs and cmcd additions
-        location /cmcd/hello {
-            js_content http_cmcd.hello;
-        }
         location /cmcd/testProcessQuery {
             js_content http_cmcd.testProcessQuery;
         }

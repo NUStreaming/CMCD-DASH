@@ -2,23 +2,6 @@ var querystring = require('querystring');
 
 //
 // Sample query: 
-//   http://localhost:8080/cmcd
-//
-function hello(r) {
-    r.status = 200;
-    r.headersOut.foo = 1234;
-    r.headersOut['Content-Type'] = 'text/plain; charset=utf-8';
-    r.headersOut['Content-Length'] = 25;
-    r.sendHeader();
-    r.send('hello from nginx-');
-    r.send('js-');
-    r.send('cmcd!');
-
-    r.finish();
-}
-
-//
-// Sample query: 
 //   http://localhost:8080/cmcd/testProcessQuery?CMCD=bl%3D21300%2Csid%3D%226e2fb550-c457-11e9-bb97-0800200c9a66%22
 // Params string:
 //   'bl=21300,sid="6e2fb550-c457-11e9-bb97-0800200c9a66"'
