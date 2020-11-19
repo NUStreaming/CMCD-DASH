@@ -325,11 +325,11 @@
 
                 // constantly update overall metrics value with the latest cumulative metrics
                 window.abrHistory.overall = history;
-                if (!isPuppeteer) {
-                    qoeEvaluatorUi.logSegmentMetrics(currentMetrics.segmentBitrateKbps, 
-                                                currentMetrics.segmentStallDurationMs/1000, 
-                                                currentLatency, currentMetrics.playbackSpeed);
-                }
+                // if (!isPuppeteer) {
+                //     qoeEvaluatorUi.logSegmentMetrics(currentMetrics.segmentBitrateKbps, 
+                //                                 currentMetrics.segmentStallDurationMs/1000, 
+                //                                 currentLatency, currentMetrics.playbackSpeed);
+                // }
             });
 
             function formatTimeString(date) {

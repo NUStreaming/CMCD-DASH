@@ -1,6 +1,13 @@
 #!/bin/bash
 
 # request user input
+read -p "Run batch test for [1] single client or [2] multiple clients: " testType
+reg='^[0-9]+$'
+if ! [[ $testType =~ $reg ]] || ([ $testType -ne 1 ] && [ $testType -ne 2 ]); then
+  echo "[ERROR] Invalid user input, exiting with code 1.."
+  exit 1
+fi
+
 read -p "Enter experiment code or description: " expt_code
 
 runs_per_profile=5
@@ -67,7 +74,13 @@ do
     fi
 
     # run test
-    npm run test
+    # npm run test
+    if [ $testType -eq 1 ]; then
+      npm run test
+    elif [ $testType -eq 2 ]; then
+      npm run test-multiple
+    fi
+
     # check if test was successfully executed, e.g. no time-out
     num_results=$(ls results/$result_folder | wc -l | sed 's/ //g')
     if ((num_results<current_total_run)); then

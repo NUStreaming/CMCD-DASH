@@ -9,10 +9,12 @@
   "devDependencies": {},
   "config": {
     "ffmpeg_profile": "PROFILE_NORMAL",
-    "network_profile": "PROFILE_CASCADE"
+    "network_profile": "PROFILE_CASCADE",
+    "num_clients": 3
   },
   "scripts": {
-    "test": "node run.js $npm_package_config_network_profile || true"
+    "test": "node run.js $npm_package_config_network_profile || true",
+    "test-multiple": "node run-multiple-clients.js $npm_package_config_network_profile || true"
   },
   "batchTest": {
     "enabled": false
