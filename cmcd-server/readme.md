@@ -14,6 +14,7 @@
 # Quickstart
 
 - Launch nginx: `nginx -c <PATH_TO_CMCD-DASH>/cmcd-server/nginx/config/nginx.conf`
+  - Note: Must be *absolute path* for the config file
 - **Reload nginx config: `nginx -c <PATH_TO_CMCD-DASH>/cmcd-server/nginx/config/nginx.conf -s reload`**
 - Stop nginx: `nginx -c <PATH_TO_CMCD-DASH>/cmcd-server/nginx/config/nginx.conf -s quit`
 

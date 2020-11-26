@@ -185,6 +185,7 @@ function CmcdModel() {
         const mtp = _getMeasuredThroughputByType(request.mediaType);
         const dl = _getDeadlineByType(request.mediaType);
         const bs = _getBufferStateByRequest(request);
+        const bl = _getBufferLengthByType(request.mediaType);
 
         if (encodedBitrate) {
             data.br = encodedBitrate;
@@ -208,6 +209,10 @@ function CmcdModel() {
 
         if (!isNaN(bs) && bs !== null) {
             data.bs = bs;
+        }
+
+        if (!isNaN(bl)) {
+            data.bl = bl;
         }
 
         return data;
@@ -306,6 +311,14 @@ function CmcdModel() {
             return BUFFER_STATES.DEFAULT;
         } catch (e) {
 
+        }
+    }
+
+    function _getBufferLengthByType(mediaType) {
+        try {
+            return dashMetrics.getCurrentBufferLevel(mediaType);
+        } catch (e) {
+            return null;
         }
     }
 

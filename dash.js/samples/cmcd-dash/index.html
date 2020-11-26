@@ -17,7 +17,9 @@
     
         function init() {
             var video,
-                url = "https://dash.akamaized.net/akamai/bbb_30fps/bbb_30fps.mpd",
+                // url = "https://dash.akamaized.net/akamai/bbb_30fps/bbb_30fps.mpd",
+                // url = "http://localhost:8080/media/vod/bbb_30fps_akamai/bbb_30fps.mpd",
+                url = "http://localhost:8080/cmcd-njs/bufferBasedRateControl/media/vod/bbb_30fps_akamai/bbb_30fps.mpd",
                 version;
 
             player = dashjs.MediaPlayer().create();
@@ -35,6 +37,17 @@
                     }
                 }
             });
+
+            player.updateSettings({
+                'streaming': {
+                    'bufferToKeep': 12,
+                    'bufferTimeAtTopQuality': 12,
+		            'bufferTimeAtTopQualityLongForm': 12,
+                    'stableBufferTime': 12,
+                    'bufferPruningInterval': 4 // seg duration
+                }
+            });
+
             /* player.setAutoPlay(false); */
             player.attachView(video);
             player.attachSource(url);
@@ -117,6 +130,7 @@
         const player = init();
         const video = document.querySelector("video")
         let stallingAt = null;
+        let lastVideoTime = null;
 
         // Additional variables for QoeEvaluator in run.js
         let prevStallDurationMs = null;
@@ -220,7 +234,7 @@
                 const currentBuffer = player.getDashMetrics().getCurrentBufferLevel("video");
                 history.averageLatency = latencyCMA.average(currentLatency);
                 history.averageBufferLength = bufferCMA.average(currentBuffer);
-                console.log(history);
+                // console.log(history);
             }, 200);
 
             ////////////////////////////////////////////////////////////////////////////////
@@ -251,7 +265,7 @@
                 let segmentKey = urlParsed[urlParsed.length - 1].split('.')[0];
 
                 // console.log('');
-                // console.log('>>> FRAGMENT_LOADING_COMPLETED: ' + segmentKey);
+                console.log('>>> FRAGMENT_LOADING_COMPLETED: ' + segmentKey);
                 // console.log(history);
                 // console.log(e.request);
 
@@ -361,10 +375,14 @@
 
             video.addEventListener('waiting', (e) => {
                 stallingAt = performance.now();
+                lastVideoTime = video.currentTime;
             });
 
             video.addEventListener('timeupdate', () => {
-                checkStallResolution();
+                // To fix issue with instantaneous `timeupdate` after `waiting` event
+                if ((video.currentTime - lastVideoTime) > 0.05) {
+                    checkStallResolution();
+                }
             });
 
             function recordSwitch(quality) {
@@ -393,7 +411,10 @@
 
             function checkStallResolution() {
                 if (stallingAt !== null) {
-                    history.stallDuration += (performance.now() - stallingAt);
+                    let duration = (performance.now() - stallingAt);
+                    console.log(`... [stall] duration (ms): ${duration}`);
+                    history.stallDurationMs += duration;
+                    history.numStalls += 1;
                     stallingAt = null;
                 }
             }
