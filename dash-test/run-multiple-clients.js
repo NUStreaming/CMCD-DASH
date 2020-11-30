@@ -3,9 +3,11 @@ const puppeteer = require("puppeteer-core");
 const normalNetworkPatterns = require("./normal-network-patterns.js");
 const fastNetworkPatterns = require("./fast-network-patterns.js");
 const customNetworkPatterns = require("./custom-network-patterns.js");
+const tcNetworkPatterns = require("./tc-network-patterns.js");
 const stats = require("./stats");
-const CHROME_PATH ="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
-//const CHROME_PATH = "/opt/google/chrome/chrome";
+
+const CHROME_PATH = "/opt/google/chrome/chrome";
+//const CHROME_PATH ="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
 
 const {QoeEvaluator, QoeInfo} = require("../dash.js/samples/cmcd-dash/abr/LoLp_QoEEvaluation.js");
 
@@ -28,6 +30,8 @@ if (patterns[configNetworkProfile]) {
   NETWORK_PROFILE = patterns[configNetworkProfile]
 } else if (customNetworkPatterns[configNetworkProfile]) {
   NETWORK_PROFILE = customNetworkPatterns[configNetworkProfile]
+} else if (tcNetworkPatterns[configNetworkProfile]) {
+  NETWORK_PROFILE = tcNetworkPatterns[configNetworkProfile]
 } else {
   console.log("Error! network_profile not found, exiting with code 1...");
   process.exit(1);
@@ -247,7 +251,7 @@ if (!batchTestEnabled) {
         // the function is executed automatically when the promise is constructed
 
         const browser = await puppeteer.launch({
-          headless: false,
+          headless: true,
           executablePath: CHROME_PATH,
           defaultViewport: null,
           devtools: true,
@@ -302,10 +306,8 @@ if (!batchTestEnabled) {
           window.startRecording();
         });
 
-        // await runNetworkPattern(cdpClient, NETWORK_PROFILE);
-
-        // `toRunServerNetworkPattern`: Ensure only run server network shaping commands *once*
-        await runNetworkPatternOnServer(toRunServerNetworkPattern);
+        await runNetworkPatternOnServer(toRunServerNetworkPattern, NETWORK_PROFILE, configNetworkProfile);  // `toRunServerNetworkPattern` ensures only run server network shaping commands *once*
+        // await runNetworkPattern(cdpClient, NETWORK_PROFILE);  // Alternative: Network shaping via Chrome
 
         clearNetworkConfig();
 
@@ -463,58 +465,32 @@ if (!batchTestEnabled) {
     // }
 
     //
-    // via `tc` shaping || `pf` and `dnctl` for Mac OSX
+    // Network shaping via `tc` command / `pf` and `dnctl` for Mac OSX
     //
-    async function runNetworkPatternOnServer(toRun) {
-      // try {
-      //   console.log(`Running ${selectedProfile}.sh`);
-      //   const { stdout, stderr } = await exec('bash tc/' + selectedProfile + '.sh');
-      //   // console.log('stdout:', stdout);
-      //   // console.log('stderr:', stderr);
-      // } catch (err) {
-      //   console.log(`Error running ${selectedProfile}.sh`);
-      //   console.error(err);
-      // };
+    async function runNetworkPatternOnServer(toRun, pattern, patternName) {
 
-      // TODO
-      // throughputMeasurements.trueValues.push({ 
-      //   throughputKbps: profile.speed, 
-      //   duration: profile.duration, 
-      //   startTimestampMs: Date.now() 
-      // });
+      // Run network shaping script or command
+      if (toRun) runBashCommand('bash tc-network-profiles/' + patternName + '.sh');
 
-      var pattern = [ 
-        { 
-          speed: 20000,
-          duration: 30
-        },
-        { 
-          speed: 10000,
-          duration: 30 
-        },
-        { 
-          speed: 2000,
-          duration: 30 
-        },
-        { 
-          speed: 10000,
-          duration: 30 
-        },
-        { 
-          speed: 20000,
-          duration: 30 
+      for await (const profile of pattern) {
+        if (toRun) {
+          console.log(
+            `Setting network speed to ${profile.speed}kbps for ${profile.duration} seconds via tc`
+          );
         }
-        // { 
-        //   speed: 4000,
-        //   duration: 5 
-        // },
-        // { 
-        //   speed: 1000,
-        //   duration: 10 
-        // }
-      ]
 
-      if (toRun) runBashCommand('sudo /sbin/pfctl -f pf.conf');
+        throughputMeasurements.trueValues.push({ 
+          throughputKbps: profile.speed, 
+          duration: profile.duration, 
+          startTimestampMs: Date.now() 
+        });
+
+        await new Promise(resolve => setTimeout(resolve, profile.duration * 1000));
+      }
+      
+      // Mac OSX tc-equivalent: dnctl
+      /*
+      if (toRun) runBashCommand('sudo /sbin/ -f pf.conf');
 
       for await (const profile of pattern) {
 
@@ -534,10 +510,11 @@ if (!batchTestEnabled) {
 
         await new Promise(resolve => setTimeout(resolve, profile.duration * 1000));
       }
+      */
     }
 
     async function runBashCommand(command) {
-      console.log(`Running: ${command}`);
+      console.log(`Running: '$ ${command}'`);
       try {
         const { stdout, stderr } = await exec(command);
         console.log('stdout:', stdout);
@@ -554,7 +531,11 @@ if (!batchTestEnabled) {
     }
 
     function clearNetworkConfig() {
-      runBashCommand('sudo /sbin/pfctl -f /etc/pf.conf');
+      // Ubuntu
+      //runBashCommand('bash tc-network-profiles/kill.sh');
+      
+      // Mac OSX
+      //runBashCommand('sudo /sbin/pfctl -f /etc/pf.conf');
     }
 
   });

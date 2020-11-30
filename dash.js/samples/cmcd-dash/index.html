@@ -17,9 +17,9 @@
     
         function init() {
             var video,
-                // url = "https://dash.akamaized.net/akamai/bbb_30fps/bbb_30fps.mpd",
-                // url = "http://localhost:8080/media/vod/bbb_30fps_akamai/bbb_30fps.mpd",
-                url = "http://localhost:8080/cmcd-njs/bufferBasedRateControl/media/vod/bbb_30fps_akamai/bbb_30fps.mpd",
+                url = "http://localhost:8080/cmcd-njs/bufferBasedRateControl/media/vod/bbb_30fps_akamai/bbb_30fps.mpd",    // w/ bufferBasedRateControl
+                // url = "http://localhost:8080/media/vod/bbb_30fps_akamai/bbb_30fps.mpd",    // w/o bufferBasedRateControl
+                // url = "https://dash.akamaized.net/akamai/bbb_30fps/bbb_30fps.mpd",    // dash.js default
                 version;
 
             player = dashjs.MediaPlayer().create();

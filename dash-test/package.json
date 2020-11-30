@@ -9,8 +9,8 @@
   "devDependencies": {},
   "config": {
     "ffmpeg_profile": "PROFILE_NORMAL",
-    "network_profile": "PROFILE_CASCADE",
-    "num_clients": 3
+    "network_profile": "Spike",
+    "num_clients": 5
   },
   "scripts": {
     "test": "node run.js $npm_package_config_network_profile || true",

@@ -3,9 +3,11 @@ const puppeteer = require("puppeteer-core");
 const normalNetworkPatterns = require("./normal-network-patterns.js");
 const fastNetworkPatterns = require("./fast-network-patterns.js");
 const customNetworkPatterns = require("./custom-network-patterns.js");
+const tcNetworkPatterns = require("./tc-network-patterns.js");
 const stats = require("./stats");
-const CHROME_PATH ="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
-//const CHROME_PATH = "/opt/google/chrome/chrome";
+
+const CHROME_PATH = "/opt/google/chrome/chrome";
+//const CHROME_PATH ="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
 
 const {QoeEvaluator, QoeInfo} = require("../dash.js/samples/cmcd-dash/abr/LoLp_QoEEvaluation.js");
 
@@ -23,6 +25,8 @@ if (patterns[configNetworkProfile]) {
   NETWORK_PROFILE = patterns[configNetworkProfile]
 } else if (customNetworkPatterns[configNetworkProfile]) {
   NETWORK_PROFILE = customNetworkPatterns[configNetworkProfile]
+} else if (tcNetworkPatterns[configNetworkProfile]) {
+  NETWORK_PROFILE = tcNetworkPatterns[configNetworkProfile]
 } else {
   console.log("Error! network_profile not found, exiting with code 1...");
   process.exit(1);
@@ -427,3 +431,4 @@ sleep(waitSeconds * 1000).then(() => {
   }
 
 });
+

@@ -1,5 +1,8 @@
 node_modules
 .DS_Store
-results*
-dash-test-batch/results_processing
-dash-test-batch/may
+#results*
+#results
+dash-test/results/*
+!dash-test/results/generate_summary.py
+dash-test/results_processing
+dash-test/may
