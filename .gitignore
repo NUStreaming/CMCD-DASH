@@ -1,8 +1,8 @@
 node_modules
 .DS_Store
 #results*
-#results
+results/*
 dash-test/results/*
 !dash-test/results/generate_summary.py
 dash-test/results_processing
-dash-test/may
+dash-test-batch-old

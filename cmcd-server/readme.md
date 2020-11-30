@@ -1,9 +1,9 @@
-# Overview
+## Overview
 
 `nginx/`: Nginx JS (njs) webserver and middleware.
 `dash-server/`: Dash server, where required. (Python/Node.js/Express - TBC)
 
-# Installation & Setup
+## Installation & Setup
 
 - Install Nginx Open Source
 - Install njs module in nginx
@@ -12,7 +12,7 @@
   - Ubuntu guides: http://nginx.org/en/docs/njs/install.html (njs sources, using same installation instructions as Mac OSX guide), https://makandracards.com/konjoot/38441-ubuntu-nginx-with-txid-module (dependency packages)
 - **Update `nginx.conf` file with your `<PATH_TO_CMCD-DASH>` (under `location /media/vod { ... }`)**
 
-# Quickstart
+## Quickstart
 
 - Launch nginx: `nginx -c <PATH_TO_CMCD-DASH>/cmcd-server/nginx/config/nginx.conf`
   - Note: Must be *absolute path* for the config file
@@ -28,9 +28,9 @@
   - Or `systemctl status nginx` for webserver status
 - Check nginx version: `nginx -v`
 
-# Nginx Misc
+## Nginx Misc
 
-## File locations in Mac OSX
+### File locations in Mac OSX
 
 - Log files: `/usr/local/var/log/nginx/`
   - `tail -f error.log`
