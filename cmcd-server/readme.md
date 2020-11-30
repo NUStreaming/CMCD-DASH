@@ -9,6 +9,7 @@
 - Install njs module in nginx
   - Mac OSX guide: https://github.com/Jiri-Mihal/install-nginx-module-mac-osx 
   (Note change in `--add-dynamic-module=../njs-XXXXXXXXX` to `--add-dynamic-module=../njs-XXXXXXXXX/nginx`)
+  - Ubuntu guides: http://nginx.org/en/docs/njs/install.html (njs sources, using same installation instructions as Mac OSX guide), https://makandracards.com/konjoot/38441-ubuntu-nginx-with-txid-module (dependency packages)
 - **Update `nginx.conf` file with your `<PATH_TO_CMCD-DASH>` (under `location /media/vod { ... }`)**
 
 # Quickstart
