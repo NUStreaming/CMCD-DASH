@@ -9,6 +9,10 @@ const CHROME_PATH ="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome
 
 const {QoeEvaluator, QoeInfo} = require("../dash.js/samples/cmcd-dash/abr/LoLp_QoEEvaluation.js");
 
+// For server network shaping
+const util = require('util');
+const exec = util.promisify(require('child_process').exec);
+
 let patterns;
 if (process.env.npm_package_config_ffmpeg_profile === 'PROFILE_FAST') {
   patterns = fastNetworkPatterns;
@@ -50,7 +54,7 @@ if (!batchTestEnabled) {
   function sleep (time) {
     return new Promise((resolve) => setTimeout(resolve, time));
   }
-  const waitSeconds = 10;
+  const waitSeconds = 5;
   console.log('Wait ' + waitSeconds + 's before starting browser..');
   sleep(waitSeconds * 1000).then(() => {
     // run()
@@ -226,22 +230,24 @@ if (!batchTestEnabled) {
 
       let arrayOfPromises = [];
       for (var c = 0; c < configNumClients; c++) {
-        arrayOfPromises.push(runBrowserTestPromise());
+        // Ensure run server network shaping only *once*
+        let toRunServerNetworkPattern = false;
+        if (c == 0) toRunServerNetworkPattern = true;
+        arrayOfPromises.push(runBrowserTestPromise(toRunServerNetworkPattern));
       }
       
       var results = await Promise.all(arrayOfPromises);
-      // var results = await Promise.allSettled(arrayOfPromises);
 
       return results;
     }
 
 
-    async function runBrowserTestPromise() {
+    async function runBrowserTestPromise(toRunServerNetworkPattern) {
       return new Promise(async (resolve) => {
         // the function is executed automatically when the promise is constructed
 
         const browser = await puppeteer.launch({
-          headless: true,
+          headless: false,
           executablePath: CHROME_PATH,
           defaultViewport: null,
           devtools: true,
@@ -275,21 +281,33 @@ if (!batchTestEnabled) {
           });
         });
 
-        console.log("Waiting for 10 seconds of uninterrupted max-quality playback before starting.");
-        const stabilized = await awaitStabilization(page);
-        if (!stabilized) {
-          console.error(
-            "Timed out after 30 seconds. The player must be stable at the max rendition before emulation begins. Make sure you're on a stable connection of at least 3mbps, and try again."
-          );
-          // return;
-          resolve(null);  // return null result to promise
-        }
-        console.log("Player is stable at the max quality, beginning network emulation");
+        //
+        // Stabilization feature
+        //
+        // console.log("Waiting for 10 seconds of uninterrupted max-quality playback before starting.");
+        // const stabilized = await awaitStabilization(page);
+        // if (!stabilized) {
+        //   console.error(
+        //     "Timed out after 30 seconds. The player must be stable at the max rendition before emulation begins. Make sure you're on a stable connection of at least 3mbps, and try again."
+        //   );
+        //   // return;
+
+        //   resolve(null);  // return null result to promise
+        //   return;
+        // }
+        // console.log("Player is stable at the max quality, beginning network emulation");
+
+        console.log("Beginning network emulation");
         page.evaluate(() => {
           window.startRecording();
         });
 
-        await runNetworkPattern(cdpClient, NETWORK_PROFILE);
+        // await runNetworkPattern(cdpClient, NETWORK_PROFILE);
+
+        // `toRunServerNetworkPattern`: Ensure only run server network shaping commands *once*
+        await runNetworkPatternOnServer(toRunServerNetworkPattern);
+
+        clearNetworkConfig();
 
         const metrics = await page.evaluate(() => {
           if (window.stopRecording) {
@@ -416,29 +434,127 @@ if (!batchTestEnabled) {
       });
     }
 
-    async function runNetworkPattern(client, pattern) {
+    //
+    // via Chrome shaping
+    //
+    // async function runNetworkPattern(client, pattern) {
+    //   for await (const profile of pattern) {
+    //     console.log(
+    //       `Setting network speed to ${profile.speed}kbps for ${profile.duration} seconds`
+    //     );
+    //     throughputMeasurements.trueValues.push({ 
+    //       throughputKbps: profile.speed, 
+    //       duration: profile.duration, 
+    //       startTimestampMs: Date.now() 
+    //     });
+
+    //     setNetworkSpeedInMbps(client, profile.speed);
+    //     await new Promise(resolve => setTimeout(resolve, profile.duration * 1000));
+    //   }
+    // }
+
+    // function setNetworkSpeedInMbps(client, mbps) {
+    //   client.send("Network.emulateNetworkConditions", {
+    //     offline: false,
+    //     latency: 0,
+    //     uploadThroughput: (mbps * 1024) / 8,
+    //     downloadThroughput: (mbps * 1024) / 8
+    //   });
+    // }
+
+    //
+    // via `tc` shaping || `pf` and `dnctl` for Mac OSX
+    //
+    async function runNetworkPatternOnServer(toRun) {
+      // try {
+      //   console.log(`Running ${selectedProfile}.sh`);
+      //   const { stdout, stderr } = await exec('bash tc/' + selectedProfile + '.sh');
+      //   // console.log('stdout:', stdout);
+      //   // console.log('stderr:', stderr);
+      // } catch (err) {
+      //   console.log(`Error running ${selectedProfile}.sh`);
+      //   console.error(err);
+      // };
+
+      // TODO
+      // throughputMeasurements.trueValues.push({ 
+      //   throughputKbps: profile.speed, 
+      //   duration: profile.duration, 
+      //   startTimestampMs: Date.now() 
+      // });
+
+      var pattern = [ 
+        { 
+          speed: 20000,
+          duration: 30
+        },
+        { 
+          speed: 10000,
+          duration: 30 
+        },
+        { 
+          speed: 2000,
+          duration: 30 
+        },
+        { 
+          speed: 10000,
+          duration: 30 
+        },
+        { 
+          speed: 20000,
+          duration: 30 
+        }
+        // { 
+        //   speed: 4000,
+        //   duration: 5 
+        // },
+        // { 
+        //   speed: 1000,
+        //   duration: 10 
+        // }
+      ]
+
+      if (toRun) runBashCommand('sudo /sbin/pfctl -f pf.conf');
+
       for await (const profile of pattern) {
-        console.log(
-          `Setting network speed to ${profile.speed}kbps for ${profile.duration} seconds`
-        );
+
+        if (toRun) {
+          console.log(
+            `Setting network speed to ${profile.speed}kbps for ${profile.duration} seconds via tc || dnctl`
+          );
+          // setNetworkSpeedInMbps(client, profile.speed);
+          runBashCommand('sudo /usr/sbin/dnctl pipe 1 config bw ' + profile.speed + 'Kbit/s');
+        }
+
         throughputMeasurements.trueValues.push({ 
           throughputKbps: profile.speed, 
           duration: profile.duration, 
           startTimestampMs: Date.now() 
         });
 
-        setNetworkSpeedInMbps(client, profile.speed);
         await new Promise(resolve => setTimeout(resolve, profile.duration * 1000));
       }
     }
 
-    function setNetworkSpeedInMbps(client, mbps) {
-      client.send("Network.emulateNetworkConditions", {
-        offline: false,
-        latency: 0,
-        uploadThroughput: (mbps * 1024) / 8,
-        downloadThroughput: (mbps * 1024) / 8
-      });
+    async function runBashCommand(command) {
+      console.log(`Running: ${command}`);
+      try {
+        const { stdout, stderr } = await exec(command);
+        console.log('stdout:', stdout);
+        console.log('stderr:', stderr);
+      } catch (err) {
+        console.log(`Error running command: ${command}`);
+        console.error(err);
+
+        clearNetworkConfig();
+
+        console.log(`Exiting with code 1..`);
+        process.exit(1);
+      };
+    }
+
+    function clearNetworkConfig() {
+      runBashCommand('sudo /sbin/pfctl -f /etc/pf.conf');
     }
 
   });
