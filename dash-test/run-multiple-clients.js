@@ -5,6 +5,7 @@ const fastNetworkPatterns = require("./fast-network-patterns.js");
 const customNetworkPatterns = require("./custom-network-patterns.js");
 const tcNetworkPatterns = require("./tc-network-patterns.js");
 const stats = require("./stats");
+const clientProfile = require(process.env.npm_package_config_client_profile);
 
 const CHROME_PATH = "/opt/google/chrome/chrome";
 //const CHROME_PATH ="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
@@ -23,7 +24,6 @@ if (process.env.npm_package_config_ffmpeg_profile === 'PROFILE_FAST') {
 }
 
 const configNetworkProfile = process.env.npm_package_config_network_profile;
-const configNumClients = process.env.npm_package_config_num_clients;
 // const NETWORK_PROFILE = patterns[configNetworkProfile] || patterns.PROFILE_CASCADE;
 let NETWORK_PROFILE;
 if (patterns[configNetworkProfile]) {
@@ -38,8 +38,6 @@ if (patterns[configNetworkProfile]) {
 }
 console.log("Network profile:", configNetworkProfile);
 console.log(NETWORK_PROFILE);
-
-console.log("Number of clients (default headless mode):", configNumClients);
 
 // custom
 const readline = require('readline').createInterface({ input: process.stdin, output: process.stdout });
@@ -64,6 +62,9 @@ if (!batchTestEnabled) {
     // run()
     run()
       .then((results) => {
+        // stop server tc shaping 
+        runBashCommand('bash tc-network-profiles/kill.sh');
+
         if (results) {
           if (!fs.existsSync('./results')){
             fs.mkdirSync('./results');
@@ -233,12 +234,19 @@ if (!batchTestEnabled) {
     async function run() {
 
       let arrayOfPromises = [];
-      for (var c = 0; c < configNumClients; c++) {
-        // Ensure run server network shaping only *once*
-        let toRunServerNetworkPattern = false;
-        if (c == 0) toRunServerNetworkPattern = true;
-        arrayOfPromises.push(runBrowserTestPromise(toRunServerNetworkPattern));
-      }
+
+      // schedule clients join and leave
+      let isFirstClient=true;
+      console.log("scheduling clients");
+      clientProfile.clients.forEach( client => {
+        console.log("duration:"+client.joinDurationInMs+" numClient:"+client.numClient);
+        let videoUrl = encodeURIComponent(client.videoUrl);
+        for (var c = 0; c < client.numClient; c++) {
+          arrayOfPromises.push(runBrowserTestPromise(isFirstClient, videoUrl, client.minBuffer, client.maxBuffer, client.joinDurationInMs, client.leaveDurationInMs));
+          // Ensure run server network shaping only *once*
+          if (isFirstClient) isFirstClient = false;
+        }
+      });
       
       var results = await Promise.all(arrayOfPromises);
 
@@ -246,11 +254,18 @@ if (!batchTestEnabled) {
     }
 
 
-    async function runBrowserTestPromise(toRunServerNetworkPattern) {
+    async function runBrowserTestPromise(toRunServerNetworkPattern, videoUrl, minBuffer, maxBuffer, joinDurationInMs, leaveDurationInMs) {
+      let playBackEnded=false;
+
+      await new Promise(resolve => setTimeout(resolve, joinDurationInMs))
+        .then(function(){
+          console.log("New client is joining...");
+        });
+
       return new Promise(async (resolve) => {
         // the function is executed automatically when the promise is constructed
-
         const browser = await puppeteer.launch({
+          dumpio: true,
           headless: true,
           executablePath: CHROME_PATH,
           defaultViewport: null,
@@ -264,8 +279,12 @@ if (!batchTestEnabled) {
         const page = await context.newPage();
         //test mode setuser agent to puppeteer
         page.setUserAgent("puppeteer");
+        
+        let url="http://localhost:3000/samples/cmcd-dash/index.html";
+        // add paremeters
+        url=url+"?videoUrl="+videoUrl+"&minBuffer="+minBuffer+"&maxBuffer="+maxBuffer;
 
-        await page.goto("http://localhost:3000/samples/cmcd-dash/index.html");
+        await page.goto(url);
         const cdpClient = await page.target().createCDPSession();
 
         console.log("Waiting for player to setup.");
@@ -306,10 +325,33 @@ if (!batchTestEnabled) {
           window.startRecording();
         });
 
-        await runNetworkPatternOnServer(toRunServerNetworkPattern, NETWORK_PROFILE, configNetworkProfile);  // `toRunServerNetworkPattern` ensures only run server network shaping commands *once*
+        if (leaveDurationInMs){
+          // schedule close browser
+          new Promise(resolve => setTimeout(resolve, leaveDurationInMs))
+          .then(function(){
+            console.log("Client is leaving!");
+            playBackEnded=true;
+          });
+        }
+
+        // run asynronously always
+        runNetworkPatternOnServer(toRunServerNetworkPattern, NETWORK_PROFILE, configNetworkProfile);  // `toRunServerNetworkPattern` ensures only run server network shaping commands *once*
         // await runNetworkPattern(cdpClient, NETWORK_PROFILE);  // Alternative: Network shaping via Chrome
 
         clearNetworkConfig();
+
+        await page.exposeFunction('onPlaybackEnded', () => {
+          console.log('Playback ended!');
+          playBackEnded=true;
+        });
+        await page.evaluate(() => {
+          player.on('playbackEnded', window.onPlaybackEnded);
+        });
+
+        // wait till the playback ends.
+        while(!playBackEnded){
+          await new Promise(resolve => setTimeout(resolve, 500));
+        }
 
         const metrics = await page.evaluate(() => {
           if (window.stopRecording) {
@@ -394,6 +436,8 @@ if (!batchTestEnabled) {
           customPlaybackControl: metrics.customPlaybackControl,
           misc: metrics.misc
         };
+        // close the browser
+        browser.close()
 
         resolve(result);
       });
@@ -524,9 +568,8 @@ if (!batchTestEnabled) {
         console.error(err);
 
         clearNetworkConfig();
-
-        console.log(`Exiting with code 1..`);
-        process.exit(1);
+        // console.log(`Exiting with code 1..`);
+        // process.exit(1);
       };
     }
 

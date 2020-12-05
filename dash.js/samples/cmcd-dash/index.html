@@ -14,13 +14,40 @@
     <script class="code">
         var player;
         var ruleUsed = '';
+
+        function getQueryParams() {
+            var vars = {};
+            var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi,  
+                function(m,key,value) {
+                    vars[key] = value;
+                });
+            return vars;
+        }
     
         function init() {
             var video,
                 url = "http://localhost:8080/cmcd-njs/bufferBasedRateControl/media/vod/bbb_30fps_akamai/bbb_30fps.mpd",    // w/ bufferBasedRateControl
                 // url = "http://localhost:8080/media/vod/bbb_30fps_akamai/bbb_30fps.mpd",    // w/o bufferBasedRateControl
                 // url = "https://dash.akamaized.net/akamai/bbb_30fps/bbb_30fps.mpd",    // dash.js default
-                version;
+                version,
+                httpParams=getQueryParams(),
+                minBuffer=4,
+                maxBuffer=12;
+            
+            // if the vales came with query string override default ones
+            if ("videoUrl" in httpParams){
+                url = httpParams["videoUrl"];
+                url=decodeURIComponent(url);
+                console.log("parsed url from query string: "+url);
+            }
+            if ("minBuffer" in httpParams){
+                minBuffer=httpParams["minBuffer"];
+                console.log("parsed minBuffer from query string: "+minBuffer);
+            }
+            if ("maxBuffer" in httpParams){
+                maxBuffer=httpParams["maxBuffer"];
+                console.log("parsed maxBuffer from query string: "+maxBuffer);
+            }
 
             player = dashjs.MediaPlayer().create();
             video = document.querySelector("video");
@@ -40,11 +67,11 @@
 
             player.updateSettings({
                 'streaming': {
-                    'bufferToKeep': 12,
-                    'bufferTimeAtTopQuality': 12,
-		            'bufferTimeAtTopQualityLongForm': 12,
-                    'stableBufferTime': 12,
-                    'bufferPruningInterval': 4 // seg duration
+                    'bufferToKeep': maxBuffer,
+                    'bufferTimeAtTopQuality': maxBuffer,
+		            'bufferTimeAtTopQualityLongForm': maxBuffer,
+                    'stableBufferTime': maxBuffer,
+                    'bufferPruningInterval': minBuffer // seg duration
                 }
             });
 
