@@ -43,6 +43,7 @@ console.log(NETWORK_PROFILE);
 const readline = require('readline').createInterface({ input: process.stdin, output: process.stdout });
 let throughputMeasurements = { trueValues: [], measuredValues: [] };
 
+let allTestsDone=false;
 // allow to optionally input comments
 var input_comments = '';
 const batchTestEnabled = (process.env.npm_package_batchTest_enabled == 'true'); // convert string to boolean
@@ -62,6 +63,7 @@ if (!batchTestEnabled) {
     // run()
     run()
       .then((results) => {
+        allTestsDone=true;
         // stop server tc shaping 
         runBashCommand('bash tc-network-profiles/kill.sh');
 
@@ -530,6 +532,9 @@ if (!batchTestEnabled) {
         });
 
         await new Promise(resolve => setTimeout(resolve, profile.duration * 1000));
+        if (allTestsDone){
+          break;
+        }
       }
       
       // Mac OSX tc-equivalent: dnctl
