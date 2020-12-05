@@ -13,8 +13,7 @@ const CHROME_PATH = "/opt/google/chrome/chrome";
 const {QoeEvaluator, QoeInfo} = require("../dash.js/samples/cmcd-dash/abr/LoLp_QoEEvaluation.js");
 
 // For server network shaping
-const util = require('util');
-const exec = util.promisify(require('child_process').exec);
+const exec=require('child_process').exec
 
 let patterns;
 if (process.env.npm_package_config_ffmpeg_profile === 'PROFILE_FAST') {
@@ -43,7 +42,7 @@ console.log(NETWORK_PROFILE);
 const readline = require('readline').createInterface({ input: process.stdin, output: process.stdout });
 let throughputMeasurements = { trueValues: [], measuredValues: [] };
 
-let allTestsDone=false;
+let testFinished=false;
 // allow to optionally input comments
 var input_comments = '';
 const batchTestEnabled = (process.env.npm_package_batchTest_enabled == 'true'); // convert string to boolean
@@ -63,10 +62,6 @@ if (!batchTestEnabled) {
     // run()
     run()
       .then((results) => {
-        allTestsDone=true;
-        // stop server tc shaping 
-        runBashCommand('bash tc-network-profiles/kill.sh');
-
         if (results) {
           if (!fs.existsSync('./results')){
             fs.mkdirSync('./results');
@@ -230,7 +225,12 @@ if (!batchTestEnabled) {
           process.exit(1);
         }
       })
-      .catch(error => console.log(error));
+      .catch(error => console.log(error))
+      .finally(() => {
+        testFinished=true;
+        // stop server tc shaping 
+        runBashCommand('bash tc-network-profiles/kill.sh');
+      });
 
 
     async function run() {
@@ -267,7 +267,7 @@ if (!batchTestEnabled) {
       return new Promise(async (resolve) => {
         // the function is executed automatically when the promise is constructed
         const browser = await puppeteer.launch({
-          dumpio: true,
+          // dumpio: true,
           headless: true,
           executablePath: CHROME_PATH,
           defaultViewport: null,
@@ -345,13 +345,14 @@ if (!batchTestEnabled) {
         await page.exposeFunction('onPlaybackEnded', () => {
           console.log('Playback ended!');
           playBackEnded=true;
+          testFinished=true;
         });
         await page.evaluate(() => {
           player.on('playbackEnded', window.onPlaybackEnded);
         });
 
-        // wait till the playback ends.
-        while(!playBackEnded){
+        // wait till the playback ends or testIsFinished
+        while(!playBackEnded && !testFinished){
           await new Promise(resolve => setTimeout(resolve, 500));
         }
 
@@ -532,7 +533,7 @@ if (!batchTestEnabled) {
         });
 
         await new Promise(resolve => setTimeout(resolve, profile.duration * 1000));
-        if (allTestsDone){
+        if (testFinished){
           break;
         }
       }
@@ -565,9 +566,13 @@ if (!batchTestEnabled) {
     async function runBashCommand(command) {
       console.log(`Running: '$ ${command}'`);
       try {
-        const { stdout, stderr } = await exec(command);
-        console.log('stdout:', stdout);
-        console.log('stderr:', stderr);
+        const { stdout, stderr } = exec(command);
+        stdout.on('data', function(data) {
+          console.log('stdout:', data);
+        });
+        stderr.on('data', function(data) {
+          console.log('stderr:', data);
+        });
       } catch (err) {
         console.log(`Error running command: ${command}`);
         console.error(err);
