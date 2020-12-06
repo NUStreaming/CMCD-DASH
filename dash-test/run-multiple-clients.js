@@ -519,24 +519,26 @@ if (!batchTestEnabled) {
       // Run network shaping script or command
       if (toRun) runBashCommand('bash tc-network-profiles/' + patternName + '.sh');
 
-      for await (const profile of pattern) {
-        if (toRun) {
-          console.log(
-            `Setting network speed to ${profile.speed}kbps for ${profile.duration} seconds via tc`
-          );
-        }
+      while(!testFinished){
+        for await (const profile of pattern) {
+          if (toRun) {
+            console.log(
+              `Setting network speed to ${profile.speed}kbps for ${profile.duration} seconds via tc`
+            );
+          }
 
-        throughputMeasurements.trueValues.push({ 
-          throughputKbps: profile.speed, 
-          duration: profile.duration, 
-          startTimestampMs: Date.now() 
-        });
+          throughputMeasurements.trueValues.push({ 
+            throughputKbps: profile.speed, 
+            duration: profile.duration, 
+            startTimestampMs: Date.now() 
+          });
 
-        await new Promise(resolve => setTimeout(resolve, profile.duration * 1000));
-        if (testFinished){
-          break;
+          await new Promise(resolve => setTimeout(resolve, profile.duration * 1000));
+          if (testFinished){
+            break;
+          }
         }
-      }
+     }
       
       // Mac OSX tc-equivalent: dnctl
       /*
