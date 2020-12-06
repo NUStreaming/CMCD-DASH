@@ -273,12 +273,10 @@ if (!batchTestEnabled) {
       return new Promise(async (resolve) => {
         // the function is executed automatically when the promise is constructed
         const browser = await puppeteer.launch({
-          // dumpio: true,
           headless: true,
           executablePath: CHROME_PATH,
           defaultViewport: null,
-          devtools: true,
-          timeout: 0
+          devtools: true
         });
 
         // const page = await browser.newPage();
@@ -288,6 +286,15 @@ if (!batchTestEnabled) {
         const page = await context.newPage();
         //test mode setuser agent to puppeteer
         page.setUserAgent("puppeteer");
+        // disable timeout
+        await page.setDefaultNavigationTimeout(0);
+        
+        // see browser console log
+        /*
+        page.on('console', message =>
+          console.log(`${message.type().substr(0, 3).toUpperCase()} ${message.text()}`)
+        );
+        */
         
         let url="http://localhost:3000/samples/cmcd-dash/index.html";
         // add paremeters
