@@ -2,8 +2,7 @@
 // joinDurationInMs is the time passed when the playback is started
 // leaveDurationInMs is the dration after joining
 
-const url="http://localhost:8080/cmcd-njs/bufferBasedRateControl/media/vod/bbb_30fps_akamai/bbb_30fps.mpd";
-// const url = "http://localhost:8080/media/vod/bbb_30fps_akamai/bbb_30fps.mpd";    // w/o bufferBasedRateControl
+const url = "http://localhost:8080/media/vod/bbb_30fps_akamai/bbb_30fps.mpd";    // w/o bufferBasedRateControl
 const segmentDuration=4;
 
 const clients= [
