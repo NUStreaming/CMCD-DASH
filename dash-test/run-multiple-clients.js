@@ -278,6 +278,7 @@ if (!batchTestEnabled) {
           executablePath: CHROME_PATH,
           defaultViewport: null,
           devtools: true,
+          timeout: 0
         });
 
         // const page = await browser.newPage();
