@@ -41,6 +41,7 @@ for root, dirs, files in os.walk(folder):
                      if summaryResults[metric]["max"] == None or data[metric] > summaryResults[metric]["max"]:
                          summaryResults[metric]["max"] = data[metric]
 
+spacedLine=""
 printToConsoleAndFile("")
 printToConsoleAndFile("------------------------------------------------------")
 printToConsoleAndFile("SUMMARY")
@@ -50,6 +51,16 @@ for metric, obj in summaryResults.items():
      printToConsoleAndFile("- average: " + str(summaryResults[metric]["sum"] / summaryResults[metric]["count"]))
      for key, value in obj.items():
         printToConsoleAndFile("- " + key + ": " + str(value))
+     spacedLine+=str(summaryResults[metric]["sum"] / summaryResults[metric]["count"]) + " "
+     spacedLine+=str(summaryResults[metric]["min"]) + " " + str(summaryResults[metric]["max"]) + " "
+
+#easier to paste to csv
+headers=""
+for metric in metrics:
+    headers+=metric+"_average "+metric+"_min "+metric+"_max "
+print("")
+print(headers)
+print(spacedLine)
 
  
 comments = None
