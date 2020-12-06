@@ -39,6 +39,46 @@ const Spike = [
 ];
 
 // This profile represents smooth, long-term changes which lie comfortably between renditions.
+const Cascadex1_5 = [
+  {
+    speed: 75000,
+    duration: 30
+  },
+  {
+    speed: 30000,
+    duration: 30
+  },
+  {
+    speed: 15000,
+    duration: 30
+  },
+  {
+    speed: 7500,
+    duration: 30
+  },
+  {
+    speed: 15000,
+    duration: 30
+  },
+  {
+    speed: 30000,
+    duration: 30
+  }
+];
+
+// This profile represents a sharp downward spike in bandwidth.
+const Spikex1_5 = [
+{
+  speed: 30000,
+  duration: 30
+},
+{
+  speed: 7500,
+  duration: 30
+}
+];
+
+// This profile represents smooth, long-term changes which lie comfortably between renditions.
 const Cascadex2 = [
   {
     speed: 100000,
@@ -79,4 +119,4 @@ const Spikex2 = [
 ];
 
 
-module.exports = { Cascade, Spike, Cascadex2, Spikex2 };
+module.exports = { Cascade, Spike, Cascadex1_5, Spikex1_5, Cascadex2, Spikex2 };

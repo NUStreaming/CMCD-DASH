@@ -216,6 +216,7 @@ if (!batchTestEnabled) {
 
           if (!batchTestEnabled) {
             console.log("Test finished. Press cmd+c to exit.");
+            process.exit(0);
           } else {
             process.exit(0);
           }
@@ -229,6 +230,7 @@ if (!batchTestEnabled) {
       .catch(error => {
         console.log(error);
         finishTests();
+        process.exit(1);
       });
 
     function finishTests(){
@@ -289,6 +291,7 @@ if (!batchTestEnabled) {
         let url="http://localhost:3000/samples/cmcd-dash/index.html";
         // add paremeters
         url=url+"?videoUrl="+videoUrl+"&minBuffer="+minBuffer+"&maxBuffer="+maxBuffer;
+        console.log("going to url with puppeteer: "+url);
 
         await page.goto(url);
         const cdpClient = await page.target().createCDPSession();
@@ -444,7 +447,8 @@ if (!batchTestEnabled) {
           misc: metrics.misc
         };
         // close the browser
-        browser.close()
+        page.close();
+        browser.close();
 
         resolve(result);
       });
