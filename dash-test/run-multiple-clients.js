@@ -62,6 +62,7 @@ if (!batchTestEnabled) {
     // run()
     run()
       .then((results) => {
+        finishTests();
         if (results) {
           if (!fs.existsSync('./results')){
             fs.mkdirSync('./results');
@@ -225,13 +226,16 @@ if (!batchTestEnabled) {
           process.exit(1);
         }
       })
-      .catch(error => console.log(error))
-      .finally(() => {
+      .catch(error => {
+        console.log(error);
+        finishTests();
+      });
+
+    function finishTests(){
         testFinished=true;
         // stop server tc shaping 
         runBashCommand('bash tc-network-profiles/kill.sh');
-      });
-
+    }
 
     async function run() {
 
