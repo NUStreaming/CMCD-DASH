@@ -10,6 +10,16 @@ var globalSessions = {};
 //     }
 // }
 
+// For cmcd logging
+var fs = require('fs');
+var cmcdLogPath = '/var/log/nginx/cmcd.log';
+
+function writeToLog(msg) {
+    var dateTime = new Date().toLocaleString();
+    var logLine = ('\n[' + dateTime + '] ' + msg);
+    fs.appendFileSync(cmcdLogPath, logLine, {encoding: 'utf8'}); 
+}
+
 //
 // Sample query: 
 //   http://localhost:8080/cmcd-njs/bufferBasedRateControl/media/vod/bbb2/bbb.mpd?CMCD=bl%3D21300%2Cbs%2Cd%3D2000%2Csid%3D%226e2fb550-c457-11e9-bb97-0800200c9a66%22
@@ -19,6 +29,9 @@ var globalSessions = {};
 //   'bl=21300,bs,d=2000,sid="6e2fb550-c457-11e9-bb97-0800200c9a66"'
 //
 function bufferBasedRateControl(r) {
+    writeToLog('');
+    writeToLog('### New request: ' + r.uri + ' ###');
+    writeToLog('args: ' + r.variables.args);
     var dashObjUri = r.uri.split('/cmcd-njs/bufferBasedRateControl')[1];
     function done(res) {
         r.return(res.status, res.responseBody);
@@ -53,15 +66,20 @@ function getBufferBasedRate(r) {
     var bMax = paramsObj['d'] * 2;
 
     var bufferLengthMs = paramsObj['bl'] * 1000;
+ 
+    var bStarvation = ('bs' in paramsObj && (paramsObj['bs'].includes('true')));
+    writeToLog('getBufferBasedRate() triggered! bufferLengthMs: ' + bufferLengthMs + ', bMin: ' + bMin + ', bMax: ' + bMax + ', bStarvation: ' + bStarvation);
 
     // Case 1: If client buffer is in danger
-    if (bufferLengthMs < bMin || ('bs' in paramsObj && (paramsObj['bs'].includes('true')))) {
+    if (bufferLengthMs < bMin || bStarvation) {
         speed = cMax;
+        writeToLog('- Case 1: Client buffer is in danger, rate control speed: ' + speed);
     }
 
     // Case 2: If client buffer is in excess
     else if (bufferLengthMs > bMax) {
         speed = cMin;
+        writeToLog('- Case 2: Client buffer is in excess, rate control speed: ' + speed);
     }
 
     // Case 3: If client buffer is in cushion zone
@@ -69,6 +87,7 @@ function getBufferBasedRate(r) {
         var bRange = bMax - bMin;
         var cRange = cMax - cMin;
         speed = ((1 - ((bufferLengthMs - bMin) / bRange)) * cRange) + cMin;
+        writeToLog('- Case 3: Client buffer is in cushion zone, rate control speed: ' + speed);
     }
 
     // Track but not in use yet
@@ -205,3 +224,4 @@ function getTestRate(r) {
 
 // Note: We need to add the function to nginx.conf file too for HTTP access
 export default { bufferBasedRateControl, getBufferBasedRate, testProcessQuery, testRateControl, getTestRate };
+
