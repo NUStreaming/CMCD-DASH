@@ -17,7 +17,11 @@ var cmcdLogPath = '/var/log/nginx/cmcd.log';
 function writeToLog(msg) {
     var dateTime = new Date().toLocaleString();
     var logLine = ('\n[' + dateTime + '] ' + msg);
-    fs.appendFileSync(cmcdLogPath, logLine, {encoding: 'utf8'}); 
+    try {
+        fs.appendFileSync(cmcdLogPath, logLine, {encoding: 'utf8'}); 
+    } catch (e) {
+        // do not log
+    }
 }
 
 //
