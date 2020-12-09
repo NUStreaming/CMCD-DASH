@@ -62,6 +62,7 @@ if (!batchTestEnabled) {
     // run()
     run()
       .then((results) => {
+        finishTests();
         if (results) {
           if (!fs.existsSync('./results')){
             fs.mkdirSync('./results');
@@ -215,6 +216,7 @@ if (!batchTestEnabled) {
 
           if (!batchTestEnabled) {
             console.log("Test finished. Press cmd+c to exit.");
+            process.exit(0);
           } else {
             process.exit(0);
           }
@@ -225,13 +227,17 @@ if (!batchTestEnabled) {
           process.exit(1);
         }
       })
-      .catch(error => console.log(error))
-      .finally(() => {
+      .catch(error => {
+        console.log(error);
+        finishTests();
+        process.exit(1);
+      });
+
+    function finishTests(){
         testFinished=true;
         // stop server tc shaping 
         runBashCommand('bash tc-network-profiles/kill.sh');
-      });
-
+    }
 
     async function run() {
 
@@ -267,11 +273,10 @@ if (!batchTestEnabled) {
       return new Promise(async (resolve) => {
         // the function is executed automatically when the promise is constructed
         const browser = await puppeteer.launch({
-          // dumpio: true,
           headless: true,
           executablePath: CHROME_PATH,
           defaultViewport: null,
-          devtools: true,
+          devtools: true
         });
 
         // const page = await browser.newPage();
@@ -281,10 +286,20 @@ if (!batchTestEnabled) {
         const page = await context.newPage();
         //test mode setuser agent to puppeteer
         page.setUserAgent("puppeteer");
+        // disable timeout
+        await page.setDefaultNavigationTimeout(0);
+        
+        // see browser console log
+        /*
+        page.on('console', message =>
+          console.log(`${message.type().substr(0, 3).toUpperCase()} ${message.text()}`)
+        );
+        */
         
         let url="http://localhost:3000/samples/cmcd-dash/index.html";
         // add paremeters
         url=url+"?videoUrl="+videoUrl+"&minBuffer="+minBuffer+"&maxBuffer="+maxBuffer;
+        console.log("going to url with puppeteer: "+url);
 
         await page.goto(url);
         const cdpClient = await page.target().createCDPSession();
@@ -440,7 +455,8 @@ if (!batchTestEnabled) {
           misc: metrics.misc
         };
         // close the browser
-        browser.close()
+        page.close();
+        browser.close();
 
         resolve(result);
       });
@@ -519,24 +535,26 @@ if (!batchTestEnabled) {
       // Run network shaping script or command
       if (toRun) runBashCommand('bash tc-network-profiles/' + patternName + '.sh');
 
-      for await (const profile of pattern) {
-        if (toRun) {
-          console.log(
-            `Setting network speed to ${profile.speed}kbps for ${profile.duration} seconds via tc`
-          );
-        }
+      while(!testFinished){
+        for await (const profile of pattern) {
+          if (toRun) {
+            console.log(
+              `Setting network speed to ${profile.speed}kbps for ${profile.duration} seconds via tc`
+            );
+          }
 
-        throughputMeasurements.trueValues.push({ 
-          throughputKbps: profile.speed, 
-          duration: profile.duration, 
-          startTimestampMs: Date.now() 
-        });
+          throughputMeasurements.trueValues.push({ 
+            throughputKbps: profile.speed, 
+            duration: profile.duration, 
+            startTimestampMs: Date.now() 
+          });
 
-        await new Promise(resolve => setTimeout(resolve, profile.duration * 1000));
-        if (testFinished){
-          break;
+          await new Promise(resolve => setTimeout(resolve, profile.duration * 1000));
+          if (testFinished){
+            break;
+          }
         }
-      }
+     }
       
       // Mac OSX tc-equivalent: dnctl
       /*
