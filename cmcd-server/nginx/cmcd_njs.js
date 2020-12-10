@@ -51,18 +51,22 @@ function bufferBasedRateControl(r) {
 // Triggered via bufferBasedRateControl.limit_rate setting in nginx.conf
 //
 function getBufferBasedRate(r) {
+    writeToLog('getBufferBasedRate() triggered!');
     var paramsObj = processQueryArgs(r);
 
     // If required args are not present in query, skip rate control
     if (!('d' in paramsObj) || !('bl' in paramsObj)) {
+        writeToLog('- missing "d" or "bl" params, ignoring rate limiting..');
         return 0;   // disables rate limiting
     }
 
-    // Determine speed for nginx's limit_rate variable
-    var speed;                              // bps
-    var maxCapacity = 20 * 1000 * 1000;     // bps
+    // To configure
+    var maxCapacityBitsPerS = 20 * 1000 * 1000;     // bps
+    //var maxCapacityBitsPerS = 40 * 1000 * 1000;
 
-    // Rate map
+    // Determine speed for nginx's limit_rate variable
+    var speed;                                              // bytes per s
+    var maxCapacity = Math.round(maxCapacityBitsPerS / 8);  // convert to bytes per s for njs limit_rate
     var cMin = maxCapacity * 0.1;
     var cMax = maxCapacity * 0.9;
     var bMin = paramsObj['d'];      // segment duration in ms
@@ -72,7 +76,7 @@ function getBufferBasedRate(r) {
     var bufferLengthMs = paramsObj['bl'] * 1000;
  
     var bStarvation = ('bs' in paramsObj && (paramsObj['bs'].includes('true')));
-    writeToLog('getBufferBasedRate() triggered! bufferLengthMs: ' + bufferLengthMs + ', bMin: ' + bMin + ', bMax: ' + bMax + ', bStarvation: ' + bStarvation);
+    writeToLog('- Args: bufferLengthMs: ' + bufferLengthMs + ', bMin: ' + bMin + ', bMax: ' + bMax + ', bStarvation: ' + bStarvation);
 
     // Case 1: If client buffer is in danger
     if (bufferLengthMs < bMin || bStarvation) {
@@ -90,7 +94,7 @@ function getBufferBasedRate(r) {
     else {
         var bRange = bMax - bMin;
         var cRange = cMax - cMin;
-        speed = ((1 - ((bufferLengthMs - bMin) / bRange)) * cRange) + cMin;
+        speed = Math.round(((1 - ((bufferLengthMs - bMin) / bRange)) * cRange) + cMin);
         writeToLog('- Case 3: Client buffer is in cushion zone, rate control speed: ' + speed);
     }
 
