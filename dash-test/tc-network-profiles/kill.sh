@@ -3,9 +3,11 @@
 #killall -9 Cascade.sh
 #killall -9 Spike.sh
 
-pkill -f Cascade.sh
-pkill -f Spike.sh
-
+sudo pkill -f Cascade.sh
+sudo pkill -f Spike.sh
+sudo pkill -f Cascadex2.sh
+sudo pkill -f Spikex2.sh
+sudo pkill -f Spikex2_B.sh
 
 sudo pkill tc
 #sudo pkill tc

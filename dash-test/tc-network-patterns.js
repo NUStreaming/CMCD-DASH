@@ -118,5 +118,16 @@ const Spikex2 = [
 }
 ];
 
+// This profile represents a sharp downward spike in bandwidth.
+const Spikex2_B = [
+{
+  speed: 100000,
+  duration: 30
+},
+{
+  speed: 20000,
+  duration: 30
+}
+];
 
-module.exports = { Cascade, Spike, Cascadex1_5, Spikex1_5, Cascadex2, Spikex2 };
+module.exports = { Cascade, Spike, Cascadex1_5, Spikex1_5, Cascadex2, Spikex2, Spikex2_B };
