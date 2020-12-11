@@ -249,8 +249,9 @@ if (!batchTestEnabled) {
       clientProfile.clients.forEach( client => {
         console.log("duration:"+client.joinDurationInMs+" numClient:"+client.numClient);
         let videoUrl = encodeURIComponent(client.videoUrl);
+        let delayMs = 2000;
         for (var c = 0; c < client.numClient; c++) {
-          arrayOfPromises.push(runBrowserTestPromise(isFirstClient, videoUrl, client.minBuffer, client.maxBuffer, client.joinDurationInMs, client.leaveDurationInMs));
+          arrayOfPromises.push(runBrowserTestPromise(isFirstClient, videoUrl, client.minBuffer, client.maxBuffer, (client.joinDurationInMs + (c*delayMs)), client.leaveDurationInMs));
           // Ensure run server network shaping only *once*
           if (isFirstClient) isFirstClient = false;
         }
