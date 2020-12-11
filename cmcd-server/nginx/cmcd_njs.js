@@ -1,11 +1,10 @@
 var querystring = require('querystring');
-var globalSessions = {};
+// var globalSessions = {};
 // - TEMPLATE -
 // globalSessions = {
 //     '<sid_1>': {
 //         'bl': '<buffer_length>',
 //         'bs': '<true_or_false>',
-//         'd': '<segment_duration>',
 //         'lastAllocatedRate' : '<speed>'
 //     }
 // }
@@ -55,37 +54,35 @@ function getBufferBasedRate(r) {
     var paramsObj = processQueryArgs(r);
 
     // If required args are not present in query, skip rate control
-    if (!('d' in paramsObj) || !('bl' in paramsObj)) {
-        writeToLog('- missing "d" or "bl" params, ignoring rate limiting..');
+    if (!('bl' in paramsObj) || !('bmx' in paramsObj) || !('bmn' in paramsObj)) {
+        writeToLog('- missing "bl", "bmx" or "bmn" params, ignoring rate limiting..');
         return 0;   // disables rate limiting
     }
 
     // To configure
-    var maxCapacityBitsPerS = 20 * 1000 * 1000;     // bps
-    //var maxCapacityBitsPerS = 40 * 1000 * 1000;
+    //var maxCapacityBitsPerS = 20 * 1000 * 1000;     // bps
+    var maxCapacityBitsPerS = 40 * 1000 * 1000;
 
     // Determine speed for nginx's limit_rate variable
     var speed;                                              // bytes per s
     var maxCapacity = Math.round(maxCapacityBitsPerS / 8);  // convert to bytes per s for njs limit_rate
     var cMin = maxCapacity * 0.1;
     var cMax = maxCapacity * 0.9;
-    var bMin = paramsObj['d'];      // segment duration in ms
-    // var bMax = 20000;               // ms
-    var bMax = paramsObj['d'] * 2;
-
-    var bufferLengthMs = paramsObj['bl'] * 1000;
+    var bMin = Number(paramsObj['bmn']);
+    var bMax = Number(paramsObj['bmx']);
+    var bufferLength = Number(paramsObj['bl']);
  
     var bStarvation = ('bs' in paramsObj && (paramsObj['bs'].includes('true')));
-    writeToLog('- Args: bufferLengthMs: ' + bufferLengthMs + ', bMin: ' + bMin + ', bMax: ' + bMax + ', bStarvation: ' + bStarvation);
+    writeToLog('- Args: bufferLength: ' + bufferLength + ', bMin: ' + bMin + ', bMax: ' + bMax + ', bStarvation: ' + bStarvation);
 
     // Case 1: If client buffer is in danger
-    if (bufferLengthMs < bMin || bStarvation) {
+    if (bufferLength < bMin || bStarvation) {
         speed = cMax;
         writeToLog('- Case 1: Client buffer is in danger, rate control speed: ' + speed);
     }
 
     // Case 2: If client buffer is in excess
-    else if (bufferLengthMs > bMax) {
+    else if (bufferLength > bMax) {
         speed = cMin;
         writeToLog('- Case 2: Client buffer is in excess, rate control speed: ' + speed);
     }
@@ -94,17 +91,16 @@ function getBufferBasedRate(r) {
     else {
         var bRange = bMax - bMin;
         var cRange = cMax - cMin;
-        speed = Math.round(((1 - ((bufferLengthMs - bMin) / bRange)) * cRange) + cMin);
+        speed = Math.round(((1 - ((bufferLength - bMin) / bRange)) * cRange) + cMin);
         writeToLog('- Case 3: Client buffer is in cushion zone, rate control speed: ' + speed);
     }
 
     // Track but not in use yet
-    globalSessions[paramsObj['sid']] = {
-        'bl': paramsObj['bl'],
-        'bs': paramsObj['bs'],
-        'd' : paramsObj['d'],
-        'lastAllocatedRate': speed
-    };
+    // globalSessions[paramsObj['sid']] = {
+    //     'bl': paramsObj['bl'],
+    //     'bs': paramsObj['bs'],
+    //     'lastAllocatedRate': speed
+    // };
     // print to log or something for debugging
 
     return speed;

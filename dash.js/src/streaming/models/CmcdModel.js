@@ -185,7 +185,10 @@ function CmcdModel() {
         const mtp = _getMeasuredThroughputByType(request.mediaType);
         const dl = _getDeadlineByType(request.mediaType);
         const bs = _getBufferStateByRequest(request);
+
         const bl = _getBufferLengthByType(request.mediaType);
+        const bmx = _getBufferMax();
+        const bmn = _getBufferMin();
 
         if (encodedBitrate) {
             data.br = encodedBitrate;
@@ -213,6 +216,14 @@ function CmcdModel() {
 
         if (!isNaN(bl)) {
             data.bl = bl;
+        }
+
+        if (!isNaN(bmx)) {
+            data.bmx = bmx;
+        }
+
+        if (!isNaN(bmn)) {
+            data.bmn = bmn;
         }
 
         return data;
@@ -317,6 +328,22 @@ function CmcdModel() {
     function _getBufferLengthByType(mediaType) {
         try {
             return dashMetrics.getCurrentBufferLevel(mediaType);
+        } catch (e) {
+            return null;
+        }
+    }
+
+    function _getBufferMax() {
+        try {
+            return settings.get().streaming.bufferToKeep;
+        } catch (e) {
+            return null;
+        }
+    }
+
+    function _getBufferMin() {
+        try {
+            return settings.get().streaming.bufferPruningInterval;
         } catch (e) {
             return null;
         }
