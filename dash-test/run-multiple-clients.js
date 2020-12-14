@@ -41,6 +41,7 @@ console.log(NETWORK_PROFILE);
 // custom
 const readline = require('readline').createInterface({ input: process.stdin, output: process.stdout });
 let throughputMeasurements = { trueValues: [], measuredValues: [] };
+let clientId = 0;
 
 let testFinished=false;
 // allow to optionally input comments
@@ -236,7 +237,7 @@ if (!batchTestEnabled) {
     function finishTests(){
         testFinished=true;
         // stop server tc shaping 
-        runBashCommand('bash tc-network-profiles/kill.sh');
+        runBashCommand('sudo bash tc-network-profiles/kill.sh');
     }
 
     async function run() {
@@ -249,9 +250,10 @@ if (!batchTestEnabled) {
       clientProfile.clients.forEach( client => {
         console.log("duration:"+client.joinDurationInMs+" numClient:"+client.numClient);
         let videoUrl = encodeURIComponent(client.videoUrl);
+        // let delayMs = 0;
         let delayMs = 2000;
         for (var c = 0; c < client.numClient; c++) {
-          arrayOfPromises.push(runBrowserTestPromise(isFirstClient, videoUrl, client.minBuffer, client.maxBuffer, (client.joinDurationInMs + (c*delayMs)), client.leaveDurationInMs));
+          arrayOfPromises.push(runBrowserTestPromise(isFirstClient, videoUrl, client.minBuffer, client.maxBuffer, (client.joinDurationInMs + (clientId*delayMs)), client.leaveDurationInMs));
           // Ensure run server network shaping only *once*
           if (isFirstClient) isFirstClient = false;
         }
@@ -265,10 +267,15 @@ if (!batchTestEnabled) {
 
     async function runBrowserTestPromise(toRunServerNetworkPattern, videoUrl, minBuffer, maxBuffer, joinDurationInMs, leaveDurationInMs) {
       let playBackEnded=false;
+      clientId += 1;
+      let clientName = "c" + clientId;
+      let clientUserDataDir = './userDataDir/' + clientName;
+      runBashCommand('rm -rf ' + clientUserDataDir);
+      runBashCommand('mkdir ' + clientUserDataDir);
 
       await new Promise(resolve => setTimeout(resolve, joinDurationInMs))
         .then(function(){
-          console.log("New client is joining...");
+          console.log("New client is joining... (" + clientName + ")");
         });
 
       return new Promise(async (resolve) => {
@@ -277,7 +284,8 @@ if (!batchTestEnabled) {
           headless: true,
           executablePath: CHROME_PATH,
           defaultViewport: null,
-          devtools: true
+          devtools: true,
+          userDataDir: clientUserDataDir
         });
 
         // const page = await browser.newPage();
@@ -287,6 +295,7 @@ if (!batchTestEnabled) {
         const page = await context.newPage();
         //test mode setuser agent to puppeteer
         page.setUserAgent("puppeteer");
+        await page.setCacheEnabled(false);
         // disable timeout
         await page.setDefaultNavigationTimeout(0);
         
@@ -456,8 +465,8 @@ if (!batchTestEnabled) {
           misc: metrics.misc
         };
         // close the browser
-        page.close();
-        browser.close();
+        // page.close();
+        // browser.close();
 
         resolve(result);
       });
