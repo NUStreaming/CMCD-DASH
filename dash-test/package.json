@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "description": "dash-test-batch",
   "dependencies": {
-    "puppeteer": "^2.1.1",
-    "puppeteer-core": "^2.1.1"
+    "puppeteer": "^5.5.0",
+    "puppeteer-core": "^5.5.0"
   },
   "devDependencies": {},
   "config": {
