@@ -60,6 +60,7 @@ if (!batchTestEnabled) {
   const waitSeconds = 5;
   console.log('Wait ' + waitSeconds + 's before starting browser..');
   sleep(waitSeconds * 1000).then(() => {
+    runBashCommand('rm -rf tmpUserDataDir/ ; mkdir tmpUserDataDir/');
     // run()
     run()
       .then((results) => {
@@ -269,8 +270,7 @@ if (!batchTestEnabled) {
       let playBackEnded=false;
       clientId += 1;
       let clientName = "c" + clientId;
-      let clientUserDataDir = './userDataDir/' + clientName;
-      runBashCommand('rm -rf ' + clientUserDataDir);
+      let clientUserDataDir = './tmpUserDataDir/' + clientName;
       runBashCommand('mkdir ' + clientUserDataDir);
 
       await new Promise(resolve => setTimeout(resolve, joinDurationInMs))

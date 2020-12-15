@@ -54,8 +54,14 @@ function getBufferBasedRate(r) {
     var paramsObj = processQueryArgs(r);
 
     // If required args are not present in query, skip rate control
-    if (!('bl' in paramsObj) || !('bmx' in paramsObj) || !('bmn' in paramsObj)) {
+    if (!('bl' in paramsObj) || !('bmx' in paramsObj) || !('bmn' in paramsObj) || !('ot' in paramsObj)) {
         writeToLog('- missing "bl", "bmx" or "bmn" params, ignoring rate limiting..');
+        return 0;   // disables rate limiting
+    }
+
+    // If not video type, skip rate control
+    if (paramsObj['ot'] != 'v' && paramsObj['ot'] != 'av') {
+        writeToLog('- object is not video type, ignoring rate limiting..');
         return 0;   // disables rate limiting
     }
 
