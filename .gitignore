@@ -6,3 +6,5 @@ dash-test/results/*
 !dash-test/results/generate_summary.py
 dash-test/results_processing
 dash-test-batch-old
+dash-test/results_*
+dash-test/tmpUserDataDir

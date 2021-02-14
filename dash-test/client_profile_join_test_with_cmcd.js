@@ -8,22 +8,32 @@ const segmentDuration=4;
 const clients= [
     {
         joinDurationInMs: 0, 
-        numClient: 2,
+        //numClient: 2,
+	    numClient: 10,
         videoUrl: url,
         minBuffer: segmentDuration,
         maxBuffer: segmentDuration*2
     },
     {
-        joinDurationInMs: 120000, // after 2 minutes 4 clients join 
-        numClient: 4,
+        joinDurationInMs: 0,
+        numClient: 0,
+        videoUrl: url,
+        minBuffer: segmentDuration,
+	    maxBuffer: 20
+    },
+    {
+        joinDurationInMs: 120000, // after 2 minutes 3 clients join
+        //numClient: 3,
+        numClient: 0,
         videoUrl: url,
         minBuffer: segmentDuration,
         maxBuffer: segmentDuration*2
     },
     {
-        joinDurationInMs: 120000, // after 2 minutes 4 clients join 
-        leaveDurationInMs: 300000, // 4 clients stay for 5 minutes
-        numClient: 4,
+        joinDurationInMs: 120000, // after 2 minutes 5 clients join
+        leaveDurationInMs: 360000, // 5 clients stay for 6 minutes
+        //numClient: 5,
+        numClient: 0,
         videoUrl: url,
         minBuffer: segmentDuration,
         maxBuffer: segmentDuration*2

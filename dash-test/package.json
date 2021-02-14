@@ -10,7 +10,7 @@
   "config": {
     "ffmpeg_profile": "PROFILE_NORMAL",
     "network_profile": "Cascadex2",
-    "client_profile": "./client_profile_join_test_with_cmcd"
+    "client_profile": "./client_profile_join_test_no_cmcd"
   },
   "scripts": {
     "test": "node run.js $npm_package_config_network_profile || true",

@@ -60,7 +60,7 @@ if (!batchTestEnabled) {
   const waitSeconds = 5;
   console.log('Wait ' + waitSeconds + 's before starting browser..');
   sleep(waitSeconds * 1000).then(() => {
-    runBashCommand('rm -rf tmpUserDataDir/ ; mkdir tmpUserDataDir/');
+    runBashCommand('rm -rf tmpUserDataDir ; mkdir tmpUserDataDir');
     // run()
     run()
       .then((results) => {
