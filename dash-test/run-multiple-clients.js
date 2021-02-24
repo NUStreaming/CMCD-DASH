@@ -13,7 +13,7 @@ const CHROME_PATH = "/opt/google/chrome/chrome";
 const {QoeEvaluator, QoeInfo} = require("../dash.js/samples/cmcd-dash/abr/LoLp_QoEEvaluation.js");
 
 // For server network shaping
-const exec=require('child_process').exec
+const exec = require('child_process').exec
 
 let patterns;
 if (process.env.npm_package_config_ffmpeg_profile === 'PROFILE_FAST') {
@@ -32,11 +32,15 @@ if (patterns[configNetworkProfile]) {
 } else if (tcNetworkPatterns[configNetworkProfile]) {
   NETWORK_PROFILE = tcNetworkPatterns[configNetworkProfile]
 } else {
-  console.log("Error! network_profile not found, exiting with code 1...");
-  process.exit(1);
+  if (fs.existsSync("tc-network-profiles/" + configNetworkProfile + ".sh")) {
+    NETWORK_PROFILE = "(Server-side network shaping in use. See profile's bash script for details.)"
+  } else {
+    console.log("Error! network_profile not found, exiting with code 1...");
+    process.exit(1);
+  }
 }
-console.log("Network profile:", configNetworkProfile);
-console.log(NETWORK_PROFILE);
+console.log("Network profile: ", configNetworkProfile);
+console.log(NETWORK_PROFILE + "\n");
 
 // custom
 const readline = require('readline').createInterface({ input: process.stdin, output: process.stdout });
@@ -60,8 +64,11 @@ if (!batchTestEnabled) {
   const waitSeconds = 5;
   console.log('Wait ' + waitSeconds + 's before starting browser..');
   sleep(waitSeconds * 1000).then(() => {
-    runBashCommand('rm -rf tmpUserDataDir ; mkdir tmpUserDataDir');
-    // run()
+    userDataDir = "tmpUserDataDir"
+    fs.rmdirSync(userDataDir, { recursive: true });
+    fs.mkdirSync(userDataDir);
+    // runBashCommand('sudo rm -rf tmpUserDataDir/');
+    // runBashCommand('sudo mkdir tmpUserDataDir');
     run()
       .then((results) => {
         finishTests();
@@ -238,7 +245,7 @@ if (!batchTestEnabled) {
     function finishTests(){
         testFinished=true;
         // stop server tc shaping 
-        runBashCommand('sudo bash tc-network-profiles/kill.sh');
+        clearNetworkConfig();
     }
 
     async function run() {
@@ -270,8 +277,9 @@ if (!batchTestEnabled) {
       let playBackEnded=false;
       clientId += 1;
       let clientName = "c" + clientId;
-      let clientUserDataDir = './tmpUserDataDir/' + clientName;
-      runBashCommand('mkdir ' + clientUserDataDir);
+      let clientUserDataDir = 'tmpUserDataDir/' + clientName;
+      // runBashCommand('sudo mkdir ' + clientUserDataDir);
+      fs.mkdirSync(clientUserDataDir);
 
       await new Promise(resolve => setTimeout(resolve, joinDurationInMs))
         .then(function(){
@@ -362,10 +370,10 @@ if (!batchTestEnabled) {
         }
 
         // run asynronously always
-        runNetworkPatternOnServer(toRunServerNetworkPattern, NETWORK_PROFILE, configNetworkProfile);  // `toRunServerNetworkPattern` ensures only run server network shaping commands *once*
+        runNetworkPatternOnServer(toRunServerNetworkPattern, configNetworkProfile);  // `toRunServerNetworkPattern` ensures only run server network shaping commands *once*
         // await runNetworkPattern(cdpClient, NETWORK_PROFILE);  // Alternative: Network shaping via Chrome
 
-        clearNetworkConfig();
+        // clearNetworkConfig();
 
         await page.exposeFunction('onPlaybackEnded', () => {
           console.log('Playback ended!');
@@ -540,31 +548,32 @@ if (!batchTestEnabled) {
     //
     // Network shaping via `tc` command / `pf` and `dnctl` for Mac OSX
     //
-    async function runNetworkPatternOnServer(toRun, pattern, patternName) {
+    async function runNetworkPatternOnServer(toRun, patternName, pattern) {
 
       // Run network shaping script or command
       if (toRun) runBashCommand('bash tc-network-profiles/' + patternName + '.sh');
 
-      while(!testFinished){
-        for await (const profile of pattern) {
-          if (toRun) {
-            console.log(
-              `Setting network speed to ${profile.speed}kbps for ${profile.duration} seconds via tc`
-            );
-          }
+      // Removed client-side logging of server network shaping (moved to server-side)
+      // while(!testFinished){
+      //   for await (const profile of pattern) {
+      //     if (toRun) {
+      //       console.log(
+      //         `Setting network speed to ${profile.speed}kbps for ${profile.duration} seconds via tc`
+      //       );
+      //     }
 
-          throughputMeasurements.trueValues.push({ 
-            throughputKbps: profile.speed, 
-            duration: profile.duration, 
-            startTimestampMs: Date.now() 
-          });
+      //     throughputMeasurements.trueValues.push({
+      //       throughputKbps: profile.speed,
+      //       duration: profile.duration,
+      //       startTimestampMs: Date.now()
+      //     });
 
-          await new Promise(resolve => setTimeout(resolve, profile.duration * 1000));
-          if (testFinished){
-            break;
-          }
-        }
-     }
+      //     await new Promise(resolve => setTimeout(resolve, profile.duration * 1000));
+      //     if (testFinished){
+      //       break;
+      //     }
+      //   }
+      // }
       
       // Mac OSX tc-equivalent: dnctl
       /*
@@ -605,19 +614,26 @@ if (!batchTestEnabled) {
         console.log(`Error running command: ${command}`);
         console.error(err);
 
-        clearNetworkConfig();
-        // console.log(`Exiting with code 1..`);
-        // process.exit(1);
+        // clearNetworkConfig();
+        console.log(`Exiting with code 1..`);
+        process.exit(1);
       };
     }
 
     function clearNetworkConfig() {
+      console.log("Clearing network shaping config...");
+
       // Ubuntu
-      //runBashCommand('bash tc-network-profiles/kill.sh');
+      runBashCommand('bash tc-network-profiles/kill.sh');
       
       // Mac OSX
       //runBashCommand('sudo /sbin/pfctl -f /etc/pf.conf');
     }
+
+    process.on('SIGINT', function() {
+      console.log("Caught interrupt signal!");
+      clearNetworkConfig();
+    });
 
   });
 });

@@ -9,7 +9,7 @@ const clients= [
     {
         joinDurationInMs: 0, 
         //numClient: 2,
-	    numClient: 10,
+        numClient: 10,
         videoUrl: url,
         minBuffer: segmentDuration,
         maxBuffer: segmentDuration*2
@@ -19,7 +19,7 @@ const clients= [
         numClient: 0,
         videoUrl: url,
         minBuffer: segmentDuration,
-	    maxBuffer: 20
+        maxBuffer: 20
     },
     {
         joinDurationInMs: 120000, // after 2 minutes 3 clients join

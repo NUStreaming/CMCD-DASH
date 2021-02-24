@@ -1,10 +1,16 @@
 node_modules
 .DS_Store
+
 #results*
 results/*
+
 dash-test/results/*
 !dash-test/results/generate_summary.py
 dash-test/results_processing
 dash-test-batch-old
 dash-test/results_*
 dash-test/tmpUserDataDir
+
+cmcd-server/nginx/media/vod/QualaDataset/*
+!cmcd-server/nginx/media/vod/QualaDataset/readme.txt
+
