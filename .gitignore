@@ -10,6 +10,8 @@ dash-test/results_processing
 dash-test-batch-old
 dash-test/results_*
 dash-test/tmpUserDataDir
+dash-test/tc-network-profiles/log/*
+!dash-test/tc-network-profiles/log/sample_10c_Cascade.csv
 
 cmcd-server/nginx/media/vod/QualaDataset/*
 !cmcd-server/nginx/media/vod/QualaDataset/readme.txt

@@ -11,17 +11,21 @@
 
 for f in tc-network-profiles/*.sh
 do
-    echo "Running: '$ sudo pkill -f ${f}'"
-    sudo pkill -f ${f}
+    currentScriptName=`basename "$0"`
+    if [[ "$f" != *"$currentScriptName"* ]];
+    then
+        echo "Running: '$ sudo pkill -f ${f}'"
+        sudo pkill -f ${f}
+    fi
 done
 
 sudo pkill tc
 #sudo pkill tc
 
 sudo tc qdisc delete dev lo root handle 1:0
-#sudo tc qdisc delete dev lo root handle 1:0
-#sudo tc qdisc delete dev lo root handle 1:0
-#sudo tc qdisc delete dev lo root handle 1:0
-#sudo tc qdisc delete dev lo root handle 1:0
+sudo tc qdisc delete dev lo root handle 1:0
+sudo tc qdisc delete dev lo root handle 1:0
+sudo tc qdisc delete dev lo root handle 1:0
+sudo tc qdisc delete dev lo root handle 1:0
 
 echo '---------- Shaping End -----------'

@@ -12,7 +12,7 @@ const CHROME_PATH = "/opt/google/chrome/chrome";
 
 const {QoeEvaluator, QoeInfo} = require("../dash.js/samples/cmcd-dash/abr/LoLp_QoEEvaluation.js");
 
-// For server network shaping
+// To run bash commands
 const exec = require('child_process').exec
 
 let patterns;
@@ -40,7 +40,8 @@ if (patterns[configNetworkProfile]) {
   }
 }
 console.log("Network profile: ", configNetworkProfile);
-console.log(NETWORK_PROFILE + "\n");
+console.log(NETWORK_PROFILE);
+console.log('\n');
 
 // custom
 const readline = require('readline').createInterface({ input: process.stdin, output: process.stdout });
@@ -254,9 +255,9 @@ if (!batchTestEnabled) {
 
       // schedule clients join and leave
       let isFirstClient=true;
-      console.log("scheduling clients");
+      console.log("\nScheduling clients..");
       clientProfile.clients.forEach( client => {
-        console.log("duration:"+client.joinDurationInMs+" numClient:"+client.numClient);
+        console.log("- duration: " + client.joinDurationInMs + ", numClient: " + client.numClient);
         let videoUrl = encodeURIComponent(client.videoUrl);
         // let delayMs = 0;
         let delayMs = 2000;
@@ -283,7 +284,7 @@ if (!batchTestEnabled) {
 
       await new Promise(resolve => setTimeout(resolve, joinDurationInMs))
         .then(function(){
-          console.log("New client is joining... (" + clientName + ")");
+          console.log("\nNew client is joining... (" + clientName + ")");
         });
 
       return new Promise(async (resolve) => {
@@ -355,7 +356,6 @@ if (!batchTestEnabled) {
         // }
         // console.log("Player is stable at the max quality, beginning network emulation");
 
-        console.log("Beginning network emulation");
         page.evaluate(() => {
           window.startRecording();
         });
@@ -521,6 +521,7 @@ if (!batchTestEnabled) {
     // via Chrome shaping
     //
     // async function runNetworkPattern(client, pattern) {
+    //   console.log("Beginning network emulation..");
     //   for await (const profile of pattern) {
     //     console.log(
     //       `Setting network speed to ${profile.speed}kbps for ${profile.duration} seconds`
@@ -551,6 +552,7 @@ if (!batchTestEnabled) {
     async function runNetworkPatternOnServer(toRun, patternName, pattern) {
 
       // Run network shaping script or command
+      // if (toRun) runBashCommand('sudo bash tc-network-profiles/' + patternName + '.sh');
       if (toRun) runBashCommand('bash tc-network-profiles/' + patternName + '.sh');
 
       // Removed client-side logging of server network shaping (moved to server-side)
@@ -602,6 +604,7 @@ if (!batchTestEnabled) {
 
     async function runBashCommand(command) {
       console.log(`Running: '$ ${command}'`);
+
       try {
         const { stdout, stderr } = exec(command);
         stdout.on('data', function(data) {
@@ -618,13 +621,28 @@ if (!batchTestEnabled) {
         console.log(`Exiting with code 1..`);
         process.exit(1);
       };
+
+      // Implementation v2
+      // exec(command, (error, stdout, stderr) => {
+      //   if (error) {
+      //     console.log(`Error running command: ${command}`);
+      //     console.error(`exec error: ${error}`);
+
+      //     clearNetworkConfig();
+      //     console.log(`Exiting with code 1..`);
+      //     process.exit(1);
+      //   }
+      //   console.log(`stdout: ${stdout}`);
+      //   console.error(`stderr: ${stderr}`);
+      // });
     }
 
     function clearNetworkConfig() {
       console.log("Clearing network shaping config...");
 
       // Ubuntu
-      runBashCommand('bash tc-network-profiles/kill.sh');
+      // runBashCommand('sudo bash tc-network-profiles/kill.sh');
+      runBashCommand('bash tc-network-profiles/kill.sh');   // @TODO does not work, debug why
       
       // Mac OSX
       //runBashCommand('sudo /sbin/pfctl -f /etc/pf.conf');

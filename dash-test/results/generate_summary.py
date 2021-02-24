@@ -51,13 +51,13 @@ for metric, obj in summaryResults.items():
      printToConsoleAndFile("- average: " + str(summaryResults[metric]["sum"] / summaryResults[metric]["count"]))
      for key, value in obj.items():
         printToConsoleAndFile("- " + key + ": " + str(value))
-     spacedLine+=str(summaryResults[metric]["sum"] / summaryResults[metric]["count"]) + " "
-     spacedLine+=str(summaryResults[metric]["min"]) + " " + str(summaryResults[metric]["max"]) + " "
+     spacedLine+=str(summaryResults[metric]["sum"] / summaryResults[metric]["count"]) + ", "
+     spacedLine+=str(summaryResults[metric]["min"]) + ", " + str(summaryResults[metric]["max"]) + " "
 
 #easier to paste to csv
 headers=""
 for metric in metrics:
-    headers+=metric+"_average "+metric+"_min "+metric+"_max "
+    headers+=metric+"_average, "+metric+"_min, "+metric+"_max "
 print("")
 print(headers)
 print(spacedLine)
