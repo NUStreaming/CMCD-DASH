@@ -550,6 +550,7 @@ if (!batchTestEnabled) {
     // Network shaping via `tc` command / `pf` and `dnctl` for Mac OSX
     //
     async function runNetworkPatternOnServer(toRun, patternName, pattern) {
+      console.log('@@@@@@ runNetworkPatternOnServer')
 
       // Run network shaping script or command
       // if (toRun) runBashCommand('sudo bash tc-network-profiles/' + patternName + '.sh');
@@ -604,7 +605,6 @@ if (!batchTestEnabled) {
 
     async function runBashCommand(command) {
       console.log(`Running: '$ ${command}'`);
-
       try {
         const { stdout, stderr } = exec(command);
         stdout.on('data', function(data) {
@@ -617,24 +617,10 @@ if (!batchTestEnabled) {
         console.log(`Error running command: ${command}`);
         console.error(err);
 
-        // clearNetworkConfig();
-        console.log(`Exiting with code 1..`);
-        process.exit(1);
+        clearNetworkConfig();
+        // console.log(`Exiting with code 1..`);
+        // process.exit(1);
       };
-
-      // Implementation v2
-      // exec(command, (error, stdout, stderr) => {
-      //   if (error) {
-      //     console.log(`Error running command: ${command}`);
-      //     console.error(`exec error: ${error}`);
-
-      //     clearNetworkConfig();
-      //     console.log(`Exiting with code 1..`);
-      //     process.exit(1);
-      //   }
-      //   console.log(`stdout: ${stdout}`);
-      //   console.error(`stderr: ${stderr}`);
-      // });
     }
 
     function clearNetworkConfig() {
