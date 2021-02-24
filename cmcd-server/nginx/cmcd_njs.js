@@ -66,8 +66,15 @@ function getBufferBasedRate(r) {
     }
 
     // To configure
-    //var maxCapacityBitsPerS = 20 * 1000 * 1000;     // bps
-    var maxCapacityBitsPerS = 40 * 1000 * 1000;
+    // var maxCapacityBitsPerS = 20 * 1000 * 1000;     // bps
+    // var maxCapacityBitsPerS = 40 * 1000 * 1000;     // 10c_Cascade
+    var maxCapacityBitsPerS = 25 * 1000 * 1000;     // 4c_Cascade
+    // var maxCapacityBitsPerS = 30 * 1000 * 1000;     // 8c_Cascade
+    // var maxCapacityBitsPerS = 60 * 1000 * 1000;     // 12c_Cascade
+    // var maxCapacityBitsPerS = 108 * 1000 * 1000;    // 24c_Cascade
+    // var maxCapacityBitsPerS = 144 * 1000 * 1000;    // 32c_Cascade
+    // var maxCapacityBitsPerS = 168 * 1000 * 1000;    // 40c_Cascade
+    // var maxCapacityBitsPerS = 180 * 1000 * 1000;    // 48c_Cascade
 
     // Determine speed for nginx's limit_rate variable
     var speed;                                              // bytes per s
