@@ -10,17 +10,17 @@
 /*
  * Option A
  */
-// /* Single video */
-// const url = "http://localhost:8080/media/vod/bbb_30fps_akamai/bbb_30fps.mpd";    // w/o bufferBasedRateControl
-// const segmentDuration = 4;
-// /* Simulate live streaming */
-// const minBufferGlobal = segmentDuration;
-// const maxBufferGlobal = segmentDuration * 2;
+/* Single video */
+const url = "http://localhost:8080/media/vod/bbb_30fps_akamai/bbb_30fps.mpd";    // w/o bufferBasedRateControl
+const segmentDuration = 4;
+const minBufferGlobal = segmentDuration;
+const maxBufferGlobal = segmentDuration * 2;
 
 /*
  * Option B
  */
 /* Four videos */
+/*
 const urls = [
     "http://localhost:8080/media/vod/QualaDataset/v1.mpd",
     "http://localhost:8080/media/vod/QualaDataset/v2.mpd",
@@ -28,9 +28,9 @@ const urls = [
     "http://localhost:8080/media/vod/QualaDataset/v4.mpd"
 ]
 const segmentDuration = 2;
-/* Simulate vod streaming */
 const minBufferGlobal = segmentDuration * 4;
 const maxBufferGlobal = segmentDuration * 8;
+*/
 
 
 // ****************************************
@@ -40,19 +40,22 @@ const maxBufferGlobal = segmentDuration * 8;
 /*
  * Basic scenario: 10 clients with single video
  */
-// const clients =  [
-//     {
-//         joinDurationInMs: 0,
-//         numClient: 10,
-//         videoUrl: url,
-//         minBuffer: minBufferGlobal,
-//         maxBuffer: maxBufferGlobal
-//     }
-// ];
+
+const clients =  [
+    {
+        joinDurationInMs: 0,
+        numClient: 10,
+        videoUrl: url,
+        minBuffer: minBufferGlobal,
+        maxBuffer: maxBufferGlobal
+    }
+];
+
 
 /*
  * 4x clients with 4 different videos
  */
+/*
 const numClientsPerVideo = 1;
 const clients =  [
     {
@@ -84,40 +87,43 @@ const clients =  [
         maxBuffer: maxBufferGlobal
     }
 ];
+*/
 
 /*
  * Flash crowd scenario with single video, and varying min/maxBuf
  */
-// const clients= [
-//     {
-//         joinDurationInMs: 0,
-//         numClient: 2,
-//         videoUrl: url,
-//         minBuffer: segmentDuration,
-//         maxBuffer: segmentDuration*2
-//     },
-//     {
-//         joinDurationInMs: 0,
-//         numClient: 0,
-//         videoUrl: url,
-//         minBuffer: segmentDuration,
-//         maxBuffer: 20
-//     },
-//     {
-//         joinDurationInMs: 120000, // after 2 minutes 3 clients join
-//         numClient: 3,
-//         videoUrl: url,
-//         minBuffer: segmentDuration,
-//         maxBuffer: segmentDuration*2
-//     },
-//     {
-//         joinDurationInMs: 120000, // after 2 minutes 5 clients join
-//         leaveDurationInMs: 360000, // 5 clients stay for 6 minutes
-//         numClient: 5,
-//         videoUrl: url,
-//         minBuffer: segmentDuration,
-//         maxBuffer: segmentDuration*2
-//     }
-// ];
+/*
+const clients= [
+    {
+        joinDurationInMs: 0,
+        numClient: 2,
+        videoUrl: url,
+        minBuffer: segmentDuration,
+        maxBuffer: segmentDuration*2
+    },
+    {
+        joinDurationInMs: 0,
+        numClient: 0,
+        videoUrl: url,
+        minBuffer: segmentDuration,
+        maxBuffer: 20
+    },
+    {
+        joinDurationInMs: 120000, // after 2 minutes 3 clients join
+        numClient: 3,
+        videoUrl: url,
+        minBuffer: segmentDuration,
+        maxBuffer: segmentDuration*2
+    },
+    {
+        joinDurationInMs: 120000, // after 2 minutes 5 clients join
+        leaveDurationInMs: 360000, // 5 clients stay for 6 minutes
+        numClient: 5,
+        videoUrl: url,
+        minBuffer: segmentDuration,
+        maxBuffer: segmentDuration*2
+    }
+];
+*/
 
 module.exports = { clients};
