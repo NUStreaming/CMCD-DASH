@@ -294,8 +294,9 @@ if (!batchTestEnabled) {
           executablePath: CHROME_PATH,
           defaultViewport: null,
           devtools: true,
-          userDataDir: clientUserDataDir
-        });
+          userDataDir: clientUserDataDir,
+          args: ['--no-sandbox', '--disable-setuid-sandbox']  // only if you absolutely trust the content you open in Chrome
+	});
 
         // const page = await browser.newPage();
         // Create a new incognito browser context.
@@ -550,7 +551,6 @@ if (!batchTestEnabled) {
     // Network shaping via `tc` command / `pf` and `dnctl` for Mac OSX
     //
     async function runNetworkPatternOnServer(toRun, patternName, pattern) {
-      console.log('@@@@@@ runNetworkPatternOnServer')
 
       // Run network shaping script or command
       // if (toRun) runBashCommand('sudo bash tc-network-profiles/' + patternName + '.sh');
