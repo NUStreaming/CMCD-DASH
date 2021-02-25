@@ -11,17 +11,17 @@
  * Option A
  */
 /* Single video */
-
+/*
 const url = "http://localhost:8080/cmcd-njs/bufferBasedRateControl/media/vod/bbb_30fps_akamai/bbb_30fps.mpd";
 const segmentDuration = 4;
 const minBufferGlobal = segmentDuration;
 const maxBufferGlobal = segmentDuration * 2;
-
+*/
 
 /*
  * Option B
  */
-/* Four videos */
+/* Four videos - Quala dataset */
 /*
 const urls = [
     "http://localhost:8080/cmcd-njs/bufferBasedRateControl/media/vod/QualaDataset/v1.mpd",
@@ -34,6 +34,23 @@ const minBufferGlobal = segmentDuration * 4;
 const maxBufferGlobal = segmentDuration * 8;
 */
 
+/*
+ * Option C
+ */
+/* Four videos - Nossdav dataset */
+
+const urls = [
+    "http://localhost:8080/cmcd-njs/bufferBasedRateControl/media/vod/NossdavCMCD/v1/4s/v1.mpd",
+    "http://localhost:8080/cmcd-njs/bufferBasedRateControl/media/vod/NossdavCMCD/v2/4s/v2.mpd",
+    "http://localhost:8080/cmcd-njs/bufferBasedRateControl/media/vod/NossdavCMCD/v3/4s/v3.mpd",
+    "http://localhost:8080/cmcd-njs/bufferBasedRateControl/media/vod/NossdavCMCD/v4/4s/v4.mpd"
+]
+const segmentDuration = 4;
+const minBufferGlobal = segmentDuration * 3;
+const maxBufferGlobal = segmentDuration * 6;
+
+
+
 // ****************************************
 // @CONFIG - Select client scenario below.
 // ****************************************
@@ -41,7 +58,7 @@ const maxBufferGlobal = segmentDuration * 8;
 /*
  * Basic scenario: 10 clients with single video
  */
-
+/*
 const clients =  [
     {
         joinDurationInMs: 0,
@@ -51,12 +68,12 @@ const clients =  [
         maxBuffer: maxBufferGlobal
     }
 ];
-
+*/
 
 /*
  * 4x clients with 4 different videos
  */
-/*
+
 const numClientsPerVideo = 1;
 const clients =  [
     {
@@ -88,7 +105,7 @@ const clients =  [
         maxBuffer: maxBufferGlobal
     }
 ];
-*/
+
 
 /*
  * Flash crowd scenario with single video, and varying min/maxBuf

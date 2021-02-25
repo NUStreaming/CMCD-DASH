@@ -15,4 +15,6 @@ dash-test/tc-network-profiles/log/*
 
 cmcd-server/nginx/media/vod/QualaDataset/*
 !cmcd-server/nginx/media/vod/QualaDataset/readme.txt
+cmcd-server/nginx/media/vod/NossdavCMCD/*
+!cmcd-server/nginx/media/vod/NossdavCMCD/readme.txt
 
