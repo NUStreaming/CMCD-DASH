@@ -24,27 +24,27 @@ function runShaping {
 for (( c=1; c>0; c++ ))
 do
     bwMbit=270
-    durSec=60
+    durSec=30
     runShaping $bwMbit $durSec
 
     bwMbit=180
-    durSec=60
+    durSec=30
     runShaping $bwMbit $durSec
 
     bwMbit=90
-    durSec=60
+    durSec=30
     runShaping $bwMbit $durSec
 
     bwMbit=60
-    durSec=60
+    durSec=30
     runShaping $bwMbit $durSec
 
     bwMbit=90
-    durSec=60
+    durSec=30
     runShaping $bwMbit $durSec
 
     bwMbit=180
-    durSec=60
+    durSec=30
     runShaping $bwMbit $durSec
 
     echo "Done shaping loop!"
