@@ -10,13 +10,16 @@
 /*
  * Option A
  */
-/* Single video */
-/*
+/* Single Akamai video */
+
 const url = "http://localhost:8080/media/vod/bbb_30fps_akamai/bbb_30fps.mpd";    // w/o bufferBasedRateControl
 const segmentDuration = 4;
+/*
 const minBufferGlobal = segmentDuration;
 const maxBufferGlobal = segmentDuration * 2;
 */
+const minBufferGlobal = segmentDuration * 3;
+const maxBufferGlobal = segmentDuration * 6;
 
 /*
  * Option B
@@ -38,7 +41,7 @@ const maxBufferGlobal = segmentDuration * 8;
  * Option C
  */
 /* Four videos - Nossdav dataset */
-
+/*
 const urls = [
     "http://localhost:8080/media/vod/NossdavCMCD/v1/4s/v1.mpd",
     "http://localhost:8080/media/vod/NossdavCMCD/v2/4s/v2.mpd",
@@ -48,7 +51,7 @@ const urls = [
 const segmentDuration = 4;
 const minBufferGlobal = segmentDuration * 3;
 const maxBufferGlobal = segmentDuration * 6;
-
+*/
 
 
 // ****************************************
@@ -58,7 +61,7 @@ const maxBufferGlobal = segmentDuration * 6;
 /*
  * Basic scenario: 10 clients with single video
  */
-/*
+
 const clients =  [
     {
         joinDurationInMs: 0,
@@ -68,13 +71,13 @@ const clients =  [
         maxBuffer: maxBufferGlobal
     }
 ];
-*/
+
 
 /*
  * 4x clients with 4 different videos
  */
-
-const numClientsPerVideo = 1;
+/*
+const numClientsPerVideo = 3;
 const clients =  [
     {
         joinDurationInMs: 0,
@@ -105,7 +108,7 @@ const clients =  [
         maxBuffer: maxBufferGlobal
     }
 ];
-
+*/
 
 /*
  * Flash crowd scenario with single video, and varying min/maxBuf

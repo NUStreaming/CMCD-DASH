@@ -1,0 +1,22 @@
+{
+  "name": "dash-test-batch",
+  "version": "1.0.0",
+  "description": "dash-test-batch",
+  "dependencies": {
+    "puppeteer": "^5.5.0",
+    "puppeteer-core": "^5.5.0"
+  },
+  "devDependencies": {},
+  "config": {
+    "ffmpeg_profile": "PROFILE_NORMAL",
+    "network_profile": "10c_Cascade",
+    "client_profile": "./client_profile_join_test_no_cmcd"
+  },
+  "scripts": {
+    "test": "node run.js $npm_package_config_network_profile || true",
+    "test-multiple": "node run-multiple-clients.js $npm_package_config_network_profile || true"
+  },
+  "batchTest": {
+    "enabled": false
+  }
+}
