@@ -253,6 +253,17 @@ if (!batchTestEnabled) {
 
       let arrayOfPromises = [];
 
+      //schedule test end timer if it is defined
+      const testData=clientProfile.testData;
+      if (testData && testData.testDurationInMs){
+        console.log("\nSetting test timeout to "+testData.testDurationInMs);
+        new Promise(resolve => setTimeout(resolve, testData.testDurationInMs))
+          .then(function(){
+            console.log("Test is finished due to testDuration has been reached!!!");
+            testFinished=true;
+          });
+      }
+
       // schedule clients join and leave
       let isFirstClient=true;
       console.log("\nScheduling clients..");

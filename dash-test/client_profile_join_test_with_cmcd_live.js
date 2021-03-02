@@ -73,6 +73,10 @@ const clients =  [
     }
 ];
 
+const testData={
+    testDurationInMs: 300000
+}
+
 
 /*
  * 4x clients with 4 different videos
@@ -148,4 +152,4 @@ const clients= [
 ];
 */
 
-module.exports = { clients};
+module.exports = { clients, testData};
