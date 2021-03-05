@@ -1,7 +1,7 @@
 import os
 import json
 
-metrics = ["averageBitrate", "numSwitches", "stallDurationMs", "numStalls", "averageBufferLength"]
+metrics = ["averageBitrate", "numSwitches", "stallDurationMs", "numStalls", "averageBufferLength", "averageLatency", "averagePlaybackRate"]
 summaryResults = {}
 
 folder = input("Enter test folder ('XXXXX_multiple' folders only): ")
