@@ -231,7 +231,7 @@ sleep(waitSeconds * 1000).then(() => {
 
   async function run() {
     const browser = await puppeteer.launch({
-      headless: false,
+      headless: true,
       executablePath: CHROME_PATH,
       defaultViewport: null,
       devtools: true,

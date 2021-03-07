@@ -63,15 +63,17 @@ do
     jq --arg comments "$comments" '.batchTest.comments = $comments' $config_file > $config_file.tmp && mv $config_file.tmp $config_file
     jq --arg result_folder "$result_folder" '.batchTest.resultFolder = $result_folder' $config_file > $config_file.tmp && mv $config_file.tmp $config_file
 
-    # run dash server in background
-    bash ../dash-ll-server/run_server.sh &>/dev/null &
-    last_pid=$!
-    sleep 0.5
+    ### Comment out as there is no dash server
+    # # run dash server in background
+    # bash ../dash-ll-server/run_server.sh &>/dev/null &
+    # last_pid=$!
+    # sleep 0.5
 
-    if ! kill -0 $last_pid ; then
-      echo "[ERROR] dash server could not run, exiting with code 1.."
-      exit 1
-    fi
+    # if ! kill -0 $last_pid ; then
+    #   echo "[ERROR] dash server could not run, exiting with code 1.."
+    #   exit 1
+    # fi
+    ### End comment out
 
     # run test
     # npm run test
@@ -90,10 +92,12 @@ do
       current_total_run=$((current_total_run-1))
     fi
 
-    # kill dash server and (single) child process
-    kill $(pgrep -P $last_pid | grep -o '[0-9]*') # has to kill child first
-    kill $last_pid
-    # kill -- -$(ps -o pgid= $last_pid | grep -o '[0-9]*')  # kill by process grp id, not good as current shell is also terminated   
+    ### Comment out as there is no dash server
+    # # kill dash server and (single) child process
+    # kill $(pgrep -P $last_pid | grep -o '[0-9]*') # has to kill child first
+    # kill $last_pid
+    # # kill -- -$(ps -o pgid= $last_pid | grep -o '[0-9]*')  # kill by process grp id, not good as current shell is also terminated   
+    ### End comment out
   
     echo "Done run ($current_total_run/$num_runs)!"
 

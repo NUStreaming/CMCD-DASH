@@ -1,14 +1,27 @@
 var querystring = require('querystring');
-var globalSessions = {};
+// var globalSessions = {};
 // - TEMPLATE -
 // globalSessions = {
 //     '<sid_1>': {
 //         'bl': '<buffer_length>',
 //         'bs': '<true_or_false>',
-//         'd': '<segment_duration>',
 //         'lastAllocatedRate' : '<speed>'
 //     }
 // }
+
+// For cmcd logging
+var fs = require('fs');
+var cmcdLogPath = '/var/log/nginx/cmcd.log';
+
+function writeToLog(msg) {
+    var dateTime = new Date().toLocaleString();
+    var logLine = ('\n[' + dateTime + '] ' + msg);
+    try {
+        fs.appendFileSync(cmcdLogPath, logLine, {encoding: 'utf8'}); 
+    } catch (e) {
+        // do not log
+    }
+}
 
 //
 // Sample query: 
@@ -19,6 +32,9 @@ var globalSessions = {};
 //   'bl=21300,bs,d=2000,sid="6e2fb550-c457-11e9-bb97-0800200c9a66"'
 //
 function bufferBasedRateControl(r) {
+    writeToLog('');
+    writeToLog('### New request: ' + r.uri + ' ###');
+    writeToLog('args: ' + r.variables.args);
     var dashObjUri = r.uri.split('/cmcd-njs/bufferBasedRateControl')[1];
     function done(res) {
         r.return(res.status, res.responseBody);
@@ -34,50 +50,76 @@ function bufferBasedRateControl(r) {
 // Triggered via bufferBasedRateControl.limit_rate setting in nginx.conf
 //
 function getBufferBasedRate(r) {
+    writeToLog('getBufferBasedRate() triggered!');
     var paramsObj = processQueryArgs(r);
 
     // If required args are not present in query, skip rate control
-    if (!('d' in paramsObj) || !('bl' in paramsObj)) {
+    if (!('bl' in paramsObj) || !('bmx' in paramsObj) || !('bmn' in paramsObj) || !('ot' in paramsObj)) {
+        writeToLog('- missing "bl", "bmx" or "bmn" params, ignoring rate limiting..');
         return 0;   // disables rate limiting
     }
 
-    // Determine speed for nginx's limit_rate variable
-    var speed;                              // bps
-    var maxCapacity = 20 * 1000 * 1000;     // bps
+    // If not video type, skip rate control
+    if (paramsObj['ot'] != 'v' && paramsObj['ot'] != 'av') {
+        writeToLog('- object is not video type, ignoring rate limiting..');
+        return 0;   // disables rate limiting
+    }
 
-    // Rate map
+    // To configure
+    // var maxCapacityBitsPerS = 20 * 1000 * 1000;     // bps
+
+    var maxCapacityBitsPerS = 40 * 1000 * 1000;     // 10c_Cascade
+    // var maxCapacityBitsPerS = 80 * 1000 * 1000;     // 20c_Cascade
+    // var maxCapacityBitsPerS = 120 * 1000 * 1000;    // 30c_Cascade
+
+    // var maxCapacityBitsPerS = 25 * 1000 * 1000;     // 4c_Cascade
+    // var maxCapacityBitsPerS = 30 * 1000 * 1000;     // 8c_Cascade_v1
+    // var maxCapacityBitsPerS = 40 * 1000 * 1000;     // 8c_Cascade
+    // var maxCapacityBitsPerS = 60 * 1000 * 1000;     // 12c_Cascade
+    // var maxCapacityBitsPerS = 108 * 1000 * 1000;    // 24c_Cascade
+    // var maxCapacityBitsPerS = 144 * 1000 * 1000;    // 32c_Cascade
+    // var maxCapacityBitsPerS = 168 * 1000 * 1000;    // 40c_Cascade
+    // var maxCapacityBitsPerS = 180 * 1000 * 1000;    // 48c_Cascade
+
+
+    // Determine speed for nginx's limit_rate variable
+    var speed;                                              // bytes per s
+    var maxCapacity = Math.round(maxCapacityBitsPerS / 8);  // convert to bytes per s for njs limit_rate
     var cMin = maxCapacity * 0.1;
     var cMax = maxCapacity * 0.9;
-    var bMin = paramsObj['d'];      // segment duration in ms
-    // var bMax = 20000;               // ms
-    var bMax = paramsObj['d'] * 2;
-
-    var bufferLengthMs = paramsObj['bl'] * 1000;
+    var bMin = Number(paramsObj['bmn']);
+    var bMax = Number(paramsObj['bmx']);
+    var bufferLength = Number(paramsObj['bl']);
+ 
+    var bStarvation = ('bs' in paramsObj && (paramsObj['bs'].includes('true')));
+    writeToLog('- Args: bufferLength: ' + bufferLength + ', bMin: ' + bMin + ', bMax: ' + bMax + ', bStarvation: ' + bStarvation);
 
     // Case 1: If client buffer is in danger
-    if (bufferLengthMs < bMin || ('bs' in paramsObj && (paramsObj['bs'].includes('true')))) {
+    if (bufferLength < bMin || bStarvation) {
         speed = cMax;
+        writeToLog('- Case 1: Client buffer is in danger, rate control speed: ' + speed);
     }
 
     // Case 2: If client buffer is in excess
-    else if (bufferLengthMs > bMax) {
+    else if (bufferLength > bMax) {
         speed = cMin;
+        writeToLog('- Case 2: Client buffer is in excess, rate control speed: ' + speed);
     }
 
     // Case 3: If client buffer is in cushion zone
     else {
         var bRange = bMax - bMin;
         var cRange = cMax - cMin;
-        speed = ((1 - ((bufferLengthMs - bMin) / bRange)) * cRange) + cMin;
+        speed = Math.round(((1 - ((bufferLength - bMin) / bRange)) * cRange) + cMin);
+        writeToLog('- Case 3: Client buffer is in cushion zone, rate control speed: ' + speed);
     }
 
     // Track but not in use yet
-    globalSessions[paramsObj['sid']] = {
-        'bl': paramsObj['bl'],
-        'bs': paramsObj['bs'],
-        'd' : paramsObj['d'],
-        'lastAllocatedRate': speed
-    };
+    // globalSessions[paramsObj['sid']] = {
+    //     'bl': paramsObj['bl'],
+    //     'bs': paramsObj['bs'],
+    //     'lastAllocatedRate': speed
+    // };
     // print to log or something for debugging
 
     return speed;
@@ -206,3 +248,4 @@ function getTestRate(r) {
 
 // Note: We need to add the function to nginx.conf file too for HTTP access
 export default { bufferBasedRateControl, getBufferBasedRate, testProcessQuery, testRateControl, getTestRate };
+

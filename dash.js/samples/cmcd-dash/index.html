@@ -32,7 +32,7 @@
                 version,
                 httpParams=getQueryParams(),
                 minBuffer=4,
-                maxBuffer=12;
+                maxBuffer=8;
             
             // if the vales came with query string override default ones
             if ("videoUrl" in httpParams){
@@ -66,12 +66,12 @@
             });
 
             player.updateSettings({
-                'streaming': {
-                    'bufferToKeep': maxBuffer,
-                    'bufferTimeAtTopQuality': maxBuffer,
-		            'bufferTimeAtTopQualityLongForm': maxBuffer,
-                    'stableBufferTime': maxBuffer,
-                    'bufferPruningInterval': minBuffer // seg duration
+                streaming: {
+                    bufferToKeep: maxBuffer,
+                    bufferTimeAtTopQuality: maxBuffer,
+		            bufferTimeAtTopQualityLongForm: maxBuffer,
+                    stableBufferTime: maxBuffer,
+                    bufferPruningInterval: minBuffer // seg duration
                 }
             });
 
