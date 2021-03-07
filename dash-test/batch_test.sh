@@ -10,7 +10,7 @@ fi
 
 read -p "Enter experiment code or description: " expt_code
 
-runs_per_profile=5
+runs_per_profile=2
 
 # get test profiles
 profiles_file="batch_test_profiles"
