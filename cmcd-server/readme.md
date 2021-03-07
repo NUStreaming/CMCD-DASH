@@ -7,7 +7,8 @@
 
 - Install Nginx Open Source
 - Install njs module in nginx
-  - Mac OSX guide: https://github.com/Jiri-Mihal/install-nginx-module-mac-osx 
+  - Ubuntu: `sudo apt install nginx-module-njs` (if module not found, purge nginx and reinstall following: http://nginx.org/en/linux_packages.html#Ubuntu)
+  - Mac OSX: See https://github.com/Jiri-Mihal/install-nginx-module-mac-osx 
   (Note change in `--add-dynamic-module=../njs-XXXXXXXXX` to `--add-dynamic-module=../njs-XXXXXXXXX/nginx`)
   <!-- - Ubuntu guides: http://nginx.org/en/docs/njs/install.html (njs sources, using same installation instructions as Mac OSX guide), https://makandracards.com/konjoot/38441-ubuntu-nginx-with-txid-module (dependency packages) -->
 - **Update `nginx.conf` file with your `<PATH_TO_CMCD-DASH>` (under `location /media/vod { ... }`)**
@@ -30,8 +31,14 @@
 
 ## Nginx Misc
 
-### File locations in Mac OSX
+### File locations
 
+Ubuntu
+- Log files: `/var/log/nginx/`
+  - `tail -f error.log`
+  - `tail -f access.log`
+
+Mac OSX
 - Log files: `/usr/local/var/log/nginx/`
   - `tail -f error.log`
 - Conf files: `/usr/local/etc/nginx/`
