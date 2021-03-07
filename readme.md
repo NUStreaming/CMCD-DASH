@@ -3,6 +3,9 @@ CMCD-enabled dash.js prototype for paper titled: "Use of CMCD in HTTP Adaptive S
 
 ## Quick Start
 
+Run nginx server:
+- See `cmcd-server/readme` for details on setup and usage
+
 Run dash.js:
 - Path: `CMCD-DASH/`
 - `cd dash.js`
