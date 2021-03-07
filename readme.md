@@ -1,5 +1,5 @@
 # CMCD-DASH
-CMCD-enabled prototype for our paper titled: "Use of CMCD in HTTP Adaptive Streaming: Initial Findings" (submitted Mar 2021).
+CMCD-enabled dash.js prototype for paper titled: "Use of CMCD in HTTP Adaptive Streaming: Initial Findings" (Mar 2021).
 
 ## Quick Start
 
