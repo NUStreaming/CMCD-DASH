@@ -175,6 +175,7 @@ function testRateControl(r) {
 
 //
 // Triggered via testRateControl.limit_rate setting in nginx.conf
+// doc: http://nginx.org/en/docs/http/ngx_http_core_module.html#limit_rate
 //
 function getTestRate(r) {
     var decodedQueryString = querystring.decode(r.variables.query_string);
@@ -187,13 +188,13 @@ function getTestRate(r) {
             speed = 1000;
             break;
         case 'slow':
-            speed = 256000;     // 256kbps
+            speed = 256000;     // 256kBps
             break;
         case 'medium':
-            speed = 542000;     // 542kbps
+            speed = 542000;     // 542kBps
             break;
         case 'fast':
-            speed = 1627000;    // 1627kbps
+            speed = 1627000;    // 1627kBps
             break;
         default:
             speed = 0;          // disables rate limiting
