@@ -60,6 +60,10 @@ Other useful commands:
   - Or `systemctl status nginx` for webserver status
 - Log files location: `/var/log/nginx/`
   - For debugging: `tail -f error.log` and `tail -f access.log`
+  - To capture the custom logs in `cmcd_njs.js`:
+    - Create the log file: `sudo touch /var/log/nginx/cmcd.log`
+    - Update write permission for the log file: `sudo chmod 666 /var/log/nginx/cmcd.log`
+    - For debugging: `tail -f cmcd.log`
 
 ### dash.js Client
 
@@ -87,5 +91,5 @@ Other useful commands:
 
 - If the batch test script is terminated prematurely, checks must be done to ensure that all background processes are cleared:
     - Chrome: `sudo ps aux | grep chrome` and kill if any is present
-    - tc: `sudo bash tc-network-profiles/kill.sh` 
+    - tc: `sudo bash tc-network-profiles/kill.sh`
 - The network shaping script uses `sudo tc <...>`. To avoid/rectify password prompting issues, you may wish to add this to your `visudo` file: `ALL ALL=NOPASSWD: /usr/sbin/tc`
