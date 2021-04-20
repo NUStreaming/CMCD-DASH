@@ -3,15 +3,15 @@ CMCD-enabled dash.js prototype for paper titled: "Use of CMCD in HTTP Adaptive S
 
 ## Setup and Testing
 
-Run NGINX server:
+Run the NGINX server:
 - Navigate to the `cmcd-server/` folder
 - Install the NJS module in NGINX using `sudo apt install nginx-module-njs`
-- Edit <PATH_TO_CMCD-DASH> (under `location media/vod`) in `config/nginx.conf`
+- Edit <PATH_TO_CMCD-DASH> (under `location /media/vod`) in `config/nginx.conf`
 - Launch NGINX using `sudo nginx -c <PATH_TO_CMCD-DASH>/cmcd-server/nginx/config/nginx.conf` (note that the absolute path must be used)
 - Reload NGINX using `sudo nginx -c <PATH_TO_CMCD-DASH>/cmcd-server/nginx/config/nginx.conf -s reload`, if the configuration has changed
-- Test the NJS application in `cmcd_njs.js` with CMCD using `http://⟨MachineIP_ADDRESS⟩:8080/cmcd-njs/testProcessQuery?CMCD=bl%3D21300` and verify that it returns the CMCD query parameter `bl: 21300`
+- Test the NJS application `cmcd_njs.js` with CMCD using `http://⟨MachineIP_ADDRESS⟩:8080/cmcd-njs/testProcessQuery?CMCD=bl%3D21300` and verify that it returns a value of 21300 for buffer length (bl)
 
-Run dash.js:
+Run the dash.js client:
 - Navigate to the `dash.js/` folder
 - Install the dependencies using `npm install`
 - Build, watch file changes and launch samples page using `grunt dev`
@@ -21,22 +21,23 @@ Run the experiment:
 - Navigate to the `dash-test/` folder
 - Install the dependencies using `npm install`
 - Edit `network_profile` in `package.json` to specify the desired bandwidth profile for the test. The list of available bandwidth profiles are given in `dash-test/tc-network-profiles/`
-- Edit the max capacity value `maxCapacityBitsPerS` for the rate control in `cmcd_server/nginx/cmcd_njs.js` according to the selected bandwidth profile. Reload NGINX since we made a configuration change
+- Edit `maxCapacityBitsPerS` in `cmcd-server/nginx/cmcd_njs.js` according to the selected bandwidth profile. Reload the NGINX config since we made a configuration change
 - Edit `client_profile` in `package.json` to specify the desired client profile (with CMCD or NO CMCD). There are two client profiles:
     - client_profile_join_test_with_cmcd.js
     - client_profile_join_test_no_cmcd.js
 - Update the setup parameters in the two client profile files based on the target scenario, such as the numberof clients (`numClient`), minimum buffer (`minBufferGlobal`), maximum buffer (`maxBufferGlobal`), video location (`url`) and segment duration (`segmentDuration`). The set of video datasets are located in `cmcd-server/nginx/media/vod/`
-- Start a test using `npm run test-multiple-clients` (note that testing is done in Chrome headless mode by default)
+- Start a test using `npm run test-multiple-clients`. Note that testing is done in Chrome headless mode by default
 - Alternatively, to do a batch test with consecutive repeated runs for CMCD and NO CMCD (e.g. a batch test of 5 CMCD and 5 NO CMCD runs), update the parameters in the two client profile files and `batch_test.sh` and then run the batch test script with `sudo bash batch_test.sh`
     - Note that the parameter values in `batch_test.sh` will overwrite those in `package.json`, hence there is no need to edit the latter for this batch test run
-    - Also note that the `jq` tool must be installed to use this batch test script: `sudo apt-get install jq`
-- Once the runs are finished, clear any previous tc setup using `sudo bash tc-network-profiles/kill.sh` (this mustbe run before starting any new run)
+    - Note that the `jq` tool must be installed to use this batch test script: `sudo apt-get install jq`
+    - If the batch test script is terminated prematurely, the background Chrome processes need to be killed
+- Once the runs are finished, clear any previous tc setup using `sudo bash tc-network-profiles/kill.sh` (this must be run before starting any new run)
 - On completing the test run, results are generated in the `results/<timestamp>_multiple_clients/` folder orderedby the test run’s timestamp
-- To generate summary results across all clients in a test run, first navigate to the `results/folder` and then run `python generate_summary.py`
+- To generate summary results across all clients in a test run, first navigate to the `results/` folder and then run `python generate_summary.py`
 
 
 
-## Component Details
+## Other Component Details
 
 There are three main components in this setup and they correspond to the three main sub-folders:
 
@@ -47,11 +48,11 @@ There are three main components in this setup and they correspond to the three m
 
 ### NGINX Server
 
-- Nginx JS (njs) webserver and middleware (NGINX v1.18)
-- See `nginx/cmcd_njs.js` for more details on the njs application logic and implementation
-    - Note that request urls that are prefixed with `/cmcd-njs/bufferBasedRateControl` refer to CMCD requests and will trigger the njs rate control mechanism
-    - Example with CMCD: `http://localhost:8080/cmcd-njs/bufferBasedRateControl/media/vod/bbb_30fps_akamai/bbb_30fps.mpd` 
-    - Example with NO CMCD: `http://localhost:8080/media/vod/bbb_30fps_akamai/bbb_30fps.mpd`
+- Nginx JS (NJS) webserver and middleware (NGINX v1.18)
+- See `nginx/cmcd_njs.js` for more details on the NJS application logic and implementation
+    - Note that request urls that are prefixed with `/cmcd-njs/bufferBasedRateControl` refer to CMCD requests and will trigger the NJS rate control mechanism
+    - Example request with CMCD: `http://localhost:8080/cmcd-njs/bufferBasedRateControl/media/vod/bbb_30fps_akamai/bbb_30fps.mpd` 
+    - Example request with NO CMCD: `http://localhost:8080/media/vod/bbb_30fps_akamai/bbb_30fps.mpd`
 
 Other useful commands:
 - Check if NGINX is running:
@@ -59,11 +60,11 @@ Other useful commands:
   - Or `ps -ef | grep nginx`
   - Or `systemctl status nginx` for webserver status
 - Log files location: `/var/log/nginx/`
-  - For debugging: `tail -f error.log` and `tail -f access.log`
+  - To inspect logs: `tail -f error.log` and `tail -f access.log`
   - To capture the custom logs in `cmcd_njs.js`:
     - Create the log file: `sudo touch /var/log/nginx/cmcd.log`
     - Update write permission for the log file: `sudo chmod 666 /var/log/nginx/cmcd.log`
-    - For debugging: `tail -f cmcd.log`
+    - To inspect logs: `tail -f cmcd.log`
 
 ### dash.js Client
 
