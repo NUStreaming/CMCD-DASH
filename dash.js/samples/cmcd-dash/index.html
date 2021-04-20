@@ -4,11 +4,6 @@
     <meta charset="utf-8"/>
     <title>CMCD-DASH</title>
 
-    <!-- <script src="abr/dash.js"></script> -->
-    <!-- <script src="abr/LoLp_BitrateSelection.js" class="code"></script> -->
-    <!-- <script src="abr/LoLp_QoEEvaluation.js" class="code"></script> -->
-    <!-- <script src="abr/LoLp_WeightSelection.js" class="code"></script> -->
-
     <script src="../../dist/dash.all.debug.js"></script>
 
     <script class="code">
@@ -265,7 +260,7 @@
             }, 200);
 
             ////////////////////////////////////////////////////////////////////////////////
-            // may.lim: add logging on segment download (instead of polling-based)
+            // Add logging on segment download (instead of polling-based)
             ////////////////////////////////////////////////////////////////////////////////
             player.on(dashjs.MediaPlayer.events.FRAGMENT_LOADING_COMPLETED, (e) => { 
                 // Add info for QoeEvaluator in run.js
