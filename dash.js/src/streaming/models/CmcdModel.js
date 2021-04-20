@@ -128,7 +128,8 @@ function CmcdModel() {
         try {
             if (settings.get().streaming.cmcd && settings.get().streaming.cmcd.enabled) {
                 const cmcdData = _getCmcdData(request);
-                const finalPayloadString = _buildFinalString(cmcdData);
+                const cmcdDataCustomKeys = _getCmcdDataCustomKeys(request);
+                const finalPayloadString = _buildFinalString(cmcdData, cmcdDataCustomKeys);
 
                 return {
                     key: CMCD_REQUEST_FIELD_NAME,
@@ -161,6 +162,26 @@ function CmcdModel() {
         }
     }
 
+    function _getCmcdDataCustomKeys(request) {
+        try {
+            const data = {};
+            const bmx = _getBufferMax();
+            const bmn = _getBufferMin();
+
+            if (!isNaN(bmx)) {
+                data.bmx = bmx;
+            }
+
+            if (!isNaN(bmn)) {
+                data.bmn = bmn;
+            }
+
+            return data;
+        } catch (e) {
+            return null;
+        }
+    }
+
     function _setDefaultContentId(request) {
         try {
             internalData.cid = `${Utils.generateHashCode(request.url)}`;
@@ -185,10 +206,7 @@ function CmcdModel() {
         const mtp = _getMeasuredThroughputByType(request.mediaType);
         const dl = _getDeadlineByType(request.mediaType);
         const bs = _getBufferStateByRequest(request);
-
         const bl = _getBufferLengthByType(request.mediaType);
-        const bmx = _getBufferMax();
-        const bmn = _getBufferMin();
 
         if (encodedBitrate) {
             data.br = encodedBitrate;
@@ -216,14 +234,6 @@ function CmcdModel() {
 
         if (!isNaN(bl)) {
             data.bl = bl;
-        }
-
-        if (!isNaN(bmx)) {
-            data.bmx = bmx;
-        }
-
-        if (!isNaN(bmn)) {
-            data.bmn = bmn;
         }
 
         return data;
@@ -393,15 +403,18 @@ function CmcdModel() {
         }
     }
 
-    function _buildFinalString(cmcdData) {
+    function _buildFinalString(cmcdData, cmcdDataCustomKeys) {
         try {
-            if (!cmcdData) {
+            if (!cmcdData || !cmcdDataCustomKeys) {
                 return null;
             }
+
+            let finalString = '';
+
             const keys = Object.keys(cmcdData);
             const length = keys.length;
-
-            return keys.reduce((acc, key, index) => {
+            // return keys.reduce((acc, key, index) => {
+            finalString += keys.reduce((acc, key, index) => {
                 acc += `${key}=${cmcdData[key]}`;
                 if (index < length - 1) {
                     acc += ',';
@@ -409,6 +422,20 @@ function CmcdModel() {
 
                 return acc;
             }, '');
+
+            const keys2 = Object.keys(cmcdDataCustomKeys);
+            const length2 = keys2.length;
+            if (finalString.length > 0)  finalString += ','
+            finalString += keys2.reduce((acc, key, index) => {
+                acc += `com.example-${key}=${cmcdDataCustomKeys[key]}`;
+                if (index < length2 - 1) {
+                    acc += ',';
+                }
+
+                return acc;
+            }, '');
+
+            return finalString;
 
         } catch (e) {
             return null;

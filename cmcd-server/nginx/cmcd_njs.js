@@ -1,13 +1,4 @@
 var querystring = require('querystring');
-// var globalSessions = {};
-// - TEMPLATE -
-// globalSessions = {
-//     '<sid_1>': {
-//         'bl': '<buffer_length>',
-//         'bs': '<true_or_false>',
-//         'lastAllocatedRate' : '<speed>'
-//     }
-// }
 
 // For cmcd logging
 var fs = require('fs');
@@ -17,7 +8,7 @@ function writeToLog(msg) {
     var dateTime = new Date().toLocaleString();
     var logLine = ('\n[' + dateTime + '] ' + msg);
     try {
-        fs.appendFileSync(cmcdLogPath, logLine, {encoding: 'utf8'}); 
+        fs.appendFileSync(cmcdLogPath, logLine);
     } catch (e) {
         // do not log
     }
@@ -54,8 +45,8 @@ function getBufferBasedRate(r) {
     var paramsObj = processQueryArgs(r);
 
     // If required args are not present in query, skip rate control
-    if (!('bl' in paramsObj) || !('bmx' in paramsObj) || !('bmn' in paramsObj) || !('ot' in paramsObj)) {
-        writeToLog('- missing "bl", "bmx" or "bmn" params, ignoring rate limiting..');
+    if (!('bl' in paramsObj) || !('com.example-bmx' in paramsObj) || !('com.example-bmn' in paramsObj) || !('ot' in paramsObj)) {
+        writeToLog('- missing "bl", "com.example-bmx", "com.example-bmn" or "ot" params, ignoring rate limiting..');
         return 0;   // disables rate limiting
     }
 
@@ -87,8 +78,8 @@ function getBufferBasedRate(r) {
     var maxCapacity = Math.round(maxCapacityBitsPerS / 8);  // convert to bytes per s for njs limit_rate
     var cMin = maxCapacity * 0.1;
     var cMax = maxCapacity * 0.9;
-    var bMin = Number(paramsObj['bmn']);
-    var bMax = Number(paramsObj['bmx']);
+    var bMin = Number(paramsObj['com.example-bmn']);
+    var bMax = Number(paramsObj['com.example-bmx']);
     var bufferLength = Number(paramsObj['bl']);
  
     var bStarvation = ('bs' in paramsObj && (paramsObj['bs'].includes('true')));
@@ -113,14 +104,6 @@ function getBufferBasedRate(r) {
         speed = Math.round(((1 - ((bufferLength - bMin) / bRange)) * cRange) + cMin);
         writeToLog('- Case 3: Client buffer is in cushion zone, rate control speed: ' + speed);
     }
-
-    // Track but not in use yet
-    // globalSessions[paramsObj['sid']] = {
-    //     'bl': paramsObj['bl'],
-    //     'bs': paramsObj['bs'],
-    //     'lastAllocatedRate': speed
-    // };
-    // print to log or something for debugging
 
     return speed;
 }
