@@ -14,12 +14,12 @@
 
 const url = "http://localhost:8080/cmcd-njs/bufferBasedRateControl/media/vod/bbb_30fps_akamai/bbb_30fps.mpd";
 const segmentDuration = 4;
-/*
 const minBufferGlobal = segmentDuration;
 const maxBufferGlobal = segmentDuration * 2;
-*/
+/*
 const minBufferGlobal = segmentDuration * 3;
 const maxBufferGlobal = segmentDuration * 6;
+*/
 
 /*
  * Option B

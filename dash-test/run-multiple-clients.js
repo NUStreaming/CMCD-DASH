@@ -1,9 +1,9 @@
 const fs = require("fs");
 const puppeteer = require("puppeteer-core");
-const normalNetworkPatterns = require("./normal-network-patterns.js");
-const fastNetworkPatterns = require("./fast-network-patterns.js");
-const customNetworkPatterns = require("./custom-network-patterns.js");
-const tcNetworkPatterns = require("./tc-network-patterns.js");
+// const normalNetworkPatterns = require("./normal-network-patterns.js");
+// const fastNetworkPatterns = require("./fast-network-patterns.js");
+// const customNetworkPatterns = require("./custom-network-patterns.js");
+// const tcNetworkPatterns = require("./tc-network-patterns.js");
 const stats = require("./stats");
 const clientProfile = require(process.env.npm_package_config_client_profile);
 
@@ -15,22 +15,22 @@ const {QoeEvaluator, QoeInfo} = require("../dash.js/samples/cmcd-dash/abr/LoLp_Q
 // To run bash commands
 const exec = require('child_process').exec
 
-let patterns;
-if (process.env.npm_package_config_ffmpeg_profile === 'PROFILE_FAST') {
-  patterns = fastNetworkPatterns;
-} else {
-  patterns = normalNetworkPatterns
-}
+let patterns = [];
+// if (process.env.npm_package_config_ffmpeg_profile === 'PROFILE_FAST') {
+//   patterns = fastNetworkPatterns;
+// } else {
+//   patterns = normalNetworkPatterns
+// }
 
 const configNetworkProfile = process.env.npm_package_config_network_profile;
 // const NETWORK_PROFILE = patterns[configNetworkProfile] || patterns.PROFILE_CASCADE;
 let NETWORK_PROFILE;
 if (patterns[configNetworkProfile]) {
   NETWORK_PROFILE = patterns[configNetworkProfile]
-} else if (customNetworkPatterns[configNetworkProfile]) {
-  NETWORK_PROFILE = customNetworkPatterns[configNetworkProfile]
-} else if (tcNetworkPatterns[configNetworkProfile]) {
-  NETWORK_PROFILE = tcNetworkPatterns[configNetworkProfile]
+// } else if (customNetworkPatterns[configNetworkProfile]) {
+//   NETWORK_PROFILE = customNetworkPatterns[configNetworkProfile]
+// } else if (tcNetworkPatterns[configNetworkProfile]) {
+//   NETWORK_PROFILE = tcNetworkPatterns[configNetworkProfile]
 } else {
   if (fs.existsSync("tc-network-profiles/" + configNetworkProfile + ".sh")) {
     NETWORK_PROFILE = "(Server-side network shaping in use. See profile's bash script for details.)"
@@ -79,9 +79,9 @@ if (!batchTestEnabled) {
           }
 
           let timestamp = Math.floor(Date.now() / 1000);
-          let folder = './results/' + timestamp + '_multiple'; // 'm' for multiple-clients run
+          let folder = './results/' + timestamp + '_multiple_clients';
           if (process.env.npm_package_batchTest_resultFolder)
-            folder = './results/' + process.env.npm_package_batchTest_resultFolder + '/' + timestamp + '_multiple';
+            folder = './results/' + process.env.npm_package_batchTest_resultFolder + '/' + timestamp + '_multiple_clients';
           if (!fs.existsSync(folder)){
             fs.mkdirSync(folder);
           }

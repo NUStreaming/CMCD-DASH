@@ -4,7 +4,7 @@ import json
 metrics = ["averageBitrate", "numSwitches", "stallDurationMs", "numStalls", "averageBufferLength", "averageLatency", "averagePlaybackRate"]
 summaryResults = {}
 
-folder = input("Enter test folder ('XXXXX_multiple' folders only): ")
+folder = input("Enter test folder ('XXXXX_multiple_clients' folders only): ")
 
 summaryFile = os.path.join(folder, "summary.txt")
 if os.path.exists(summaryFile):
