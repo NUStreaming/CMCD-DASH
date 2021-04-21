@@ -48,7 +48,7 @@ There are three main components in this setup and they correspond to the three m
 
 ### NGINX Server
 
-- Nginx JS (NJS) webserver and middleware (NGINX v1.18)
+- NGINX JS (NJS) webserver and middleware (NGINX v1.18)
 - See `nginx/cmcd_njs.js` for more details on the NJS application logic and implementation
     - Note that request URLs that are prefixed with `/cmcd-njs/bufferBasedRateControl` refer to CMCD requests and will trigger the NJS rate control mechanism
     - Example request with CMCD: `http://localhost:8080/cmcd-njs/bufferBasedRateControl/media/vod/bbb_30fps_akamai/bbb_30fps.mpd` 
