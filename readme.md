@@ -1,5 +1,5 @@
 # CMCD-DASH
-CMCD-enabled dash.js prototype for paper titled: "Use of CMCD in HTTP Adaptive Streaming: Initial Findings" to appear in ACM NOSSDAV 2021. [Here](CMCD_Results_2020_04.pdf) is an early version presented in the DASH-IF special session on April 9th 2021.
+CMCD-enabled dash.js prototype for paper titled: "Use of CMCD in HTTP Adaptive Streaming: Initial Findings" to appear in ACM NOSSDAV 2021. [Here](CMCD_Results_2020_04.pdf) is an early version presented in the DASH-IF special session on April 9th, 2021.
 
 ## Setup and Testing
 
@@ -15,7 +15,7 @@ Run the dash.js client:
 - Navigate to the `dash.js/` folder
 - Install the dependencies using `npm install`
 - Build, watch file changes and launch samples page using `grunt dev`
-- Test the dash.js application by navigating to `http://⟨MachineIP_ADDRESS⟩:3000/samples/cmcd-dash/index.html` to view our CMCD-enabled player
+- Test the dash.js application by navigating to `http://⟨MachineIP_ADDRESS⟩:3000/samples/cmcd-dash/index.html` to view the CMCD-enabled player
 
 Run the experiment:
 - Navigate to the `dash-test/` folder
@@ -27,12 +27,12 @@ Run the experiment:
     - client_profile_join_test_no_cmcd.js
 - Update the setup parameters in the two client profile files based on the target scenario, such as the numberof clients (`numClient`), minimum buffer (`minBufferGlobal`), maximum buffer (`maxBufferGlobal`), video location (`url`) and segment duration (`segmentDuration`). The set of video datasets are located in `cmcd-server/nginx/media/vod/`
 - Start a test using `npm run test-multiple-clients`. Note that testing is done in Chrome headless mode by default
-- Alternatively, to do a batch test with consecutive repeated runs for CMCD and NO CMCD (e.g. a batch test of 5 CMCD and 5 NO CMCD runs), update the parameters in the two client profile files and `batch_test.sh` and then run the batch test script with `sudo bash batch_test.sh`
+- Alternatively, to do a batch test with consecutive repeated runs for CMCD and NO CMCD (e.g., a batch test of five CMCD and five NO CMCD runs), update the parameters in the two client profile files and `batch_test.sh` and then run the batch test script with `sudo bash batch_test.sh`
     - Note that the parameter values in `batch_test.sh` will overwrite those in `package.json`, hence there is no need to edit the latter for this batch test run
-    - Note that the `jq` tool must be installed to use this batch test script: `sudo apt-get install jq`
+    - Note that the `jq` tool must be installed to use the batch test script: `sudo apt-get install jq`
     - If the batch test script is terminated prematurely, the background Chrome processes need to be killed
 - Once the runs are finished, clear any previous tc setup using `sudo bash tc-network-profiles/kill.sh` (this must be run before starting any new run)
-- On completing the test run, results are generated in the `results/<timestamp>_multiple_clients/` folder orderedby the test run’s timestamp
+- On completing the test run, results are generated in the `results/<timestamp>_multiple_clients/` folder ordered by the test run’s timestamp
 - To generate summary results across all clients in a test run, first navigate to the `results/` folder and then run `python generate_summary.py`
 
 
@@ -50,7 +50,7 @@ There are three main components in this setup and they correspond to the three m
 
 - Nginx JS (NJS) webserver and middleware (NGINX v1.18)
 - See `nginx/cmcd_njs.js` for more details on the NJS application logic and implementation
-    - Note that request urls that are prefixed with `/cmcd-njs/bufferBasedRateControl` refer to CMCD requests and will trigger the NJS rate control mechanism
+    - Note that request URLs that are prefixed with `/cmcd-njs/bufferBasedRateControl` refer to CMCD requests and will trigger the NJS rate control mechanism
     - Example request with CMCD: `http://localhost:8080/cmcd-njs/bufferBasedRateControl/media/vod/bbb_30fps_akamai/bbb_30fps.mpd` 
     - Example request with NO CMCD: `http://localhost:8080/media/vod/bbb_30fps_akamai/bbb_30fps.mpd`
 
@@ -86,7 +86,7 @@ Other useful commands:
 
 ### NGINX Server
 
-- When running `sudo apt install nginx-module-njs`, `module not found` error occurs: Chances are, your version of NGINX is not compatible. Purge your current NGINX and reinstall the latest via: `http://nginx.org/en/linux_packages.html#Ubuntu`
+- When running `sudo apt install nginx-module-njs`, `module not found` error occurs: Chances are that your version of NGINX is not compatible. Purge your current NGINX and reinstall the latest from: `http://nginx.org/en/linux_packages.html#Ubuntu`
 
 ### Testing Environment
 
