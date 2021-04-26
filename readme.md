@@ -6,7 +6,7 @@ CMCD-enabled dash.js prototype for paper titled: "Use of CMCD in HTTP Adaptive S
 Run the NGINX server:
 - Navigate to the `cmcd-server/` folder
 - Install the NJS module in NGINX using `sudo apt install nginx-module-njs`
-- Edit <PATH_TO_CMCD-DASH> (under `location /media/vod`) in `config/nginx.conf`
+- Open `nginx/config/nginx.conf` and edit `<PATH_TO_CMCD-DASH>` (under "`location /media/vod`") to indicate the absolute path to this repository
 - Launch NGINX using `sudo nginx -c <PATH_TO_CMCD-DASH>/cmcd-server/nginx/config/nginx.conf` (note that the absolute path must be used)
 - Reload NGINX using `sudo nginx -c <PATH_TO_CMCD-DASH>/cmcd-server/nginx/config/nginx.conf -s reload`, if the configuration has changed
 - Test the NJS application `cmcd_njs.js` with CMCD using `http://⟨MachineIP_ADDRESS⟩:8080/cmcd-njs/testProcessQuery?CMCD=bl%3D21300` and verify that it returns a value of 21300 for buffer length (bl)
@@ -20,9 +20,9 @@ Run the dash.js client:
 Run the experiment:
 - Navigate to the `dash-test/` folder
 - Install the dependencies using `npm install`
-- Edit `network_profile` in `package.json` to specify the desired bandwidth profile for the test. The list of available bandwidth profiles are given in `dash-test/tc-network-profiles/`
+- Edit `network_profile` in `dash-test/package.json` to specify the desired bandwidth profile for the test. The list of available bandwidth profiles are given in `dash-test/tc-network-profiles/`
 - Edit `maxCapacityBitsPerS` in `cmcd-server/nginx/cmcd_njs.js` according to the selected bandwidth profile. Reload the NGINX config since we made a configuration change
-- Edit `client_profile` in `package.json` to specify the desired client profile (with CMCD or NO CMCD). There are two client profiles:
+- Edit `client_profile` in `dash-test/package.json` to specify the desired client profile (with CMCD or NO CMCD). There are two client profiles:
     - client_profile_join_test_with_cmcd.js
     - client_profile_join_test_no_cmcd.js
 - Update the setup parameters in the two client profile files based on the target scenario, such as the numberof clients (`numClient`), minimum buffer (`minBufferGlobal`), maximum buffer (`maxBufferGlobal`), video location (`url`) and segment duration (`segmentDuration`). The set of video datasets are located in `cmcd-server/nginx/media/vod/`
@@ -86,7 +86,7 @@ Other useful commands:
 
 ### NGINX Server
 
-- When running `sudo apt install nginx-module-njs`, `module not found` error occurs: Chances are that your version of NGINX is not compatible. Purge your current NGINX and reinstall the latest from: `http://nginx.org/en/linux_packages.html#Ubuntu`
+- When running `sudo apt install nginx-module-njs`, error occurs `E: Unable to locate package nginx-module-njs`: It is likely that your version of NGINX is not compatible. Purge your current NGINX and reinstall the latest from: `http://nginx.org/en/linux_packages.html#Ubuntu`. Alternatively, ensure that your machine's `/etc/apt/sources.list` contains the correct sources for `apt` to find the required module
 
 ### Testing Environment
 
